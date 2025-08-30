@@ -339,6 +339,7 @@ public class ServiceActivity extends Service {
             return;
         }
         addLog("encrypting...");
+        this.yaes.msg = "autosend";
         this.yaes.Encrypt(new File[] { this.io.GetLocalFile("yas_chunk.zip") }, new String[] {"yas_chunk.zip"}, pw, "yas_buffer", true);
         this.io.GetLocalFile("yas_chunk.zip").delete();
         if ( !this.yaes.err.isEmpty() ) { addLog("ERROR: " + this.yaes.err); }
@@ -686,3 +687,4 @@ public class ServiceActivity extends Service {
         addLog(10);
     }
 }
+
