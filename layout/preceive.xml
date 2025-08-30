@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+    <include layout="@layout/toolbar"/>
+
+    <!-- File selection -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        android:layout_gravity="center"
+        app:cardElevation="6dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginVertical="24dp"
+        android:layout_marginHorizontal="16dp"
+        style="@style/Widget.App.CardView.Outlined">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/preceive_addfile"
+                style="@style/Widget.App.FilledButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="addfile"
+                android:text="Select"
+                android:textSize="18sp"
+                app:icon="@drawable/icon_add"
+                app:iconSize="24dp"
+                android:textAlignment="textEnd"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="12dp"
+                android:layout_marginHorizontal="8dp"/>
+
+            <TextView
+                android:id="@+id/preceive_file"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:textSize="18sp"
+                android:textIsSelectable="true"
+                android:textColor="?attr/colorPrimaryVariant"/>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Sender Receiver -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        android:layout_gravity="center"
+        app:cardElevation="6dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginHorizontal="16dp"
+        style="@style/Widget.App.CardView.Outlined">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInputLayout.Dropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Select Sender"
+                android:textSize="18sp"
+                android:padding="12dp">
+                <AutoCompleteTextView
+                    android:id="@+id/preceive_sender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/preceive_sign"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Check Sign"
+                android:textSize="18sp"
+                android:padding="16dp"
+                android:checked="true"
+                android:textColor="?attr/colorSecondary"/>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Log display -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/rectangle"
+        android:scrollbars="vertical">
+
+        <TextView
+            android:id="@+id/preceive_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="?attr/colorSecondaryVariant"
+            android:textIsSelectable="true"
+            android:textSize="16sp" />
+    </ScrollView>
+
+</LinearLayout>

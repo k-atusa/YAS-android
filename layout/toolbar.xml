@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<com.google.android.material.appbar.MaterialToolbar
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorPrimary"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.0"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:titleTextColor="?attr/colorOnPrimary">
+
+    <ImageButton
+        android:id="@+id/toolbar_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginTop="28dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="menu"
+        android:padding="8dp"
+        android:src="@drawable/icon_menu"
+        app:tint="?attr/colorOnPrimary" />
+
+    <TextView
+        android:id="@+id/toolbar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Menu"
+        android:textSize="24sp"
+        android:layout_marginTop="36dp"
+        android:padding="8dp"
+        android:layout_gravity="start"
+        android:textColor="?attr/colorOnPrimary"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/toolbar_run"
+        style="@style/Widget.Material3.Button.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="28dp"
+        android:contentDescription="run"
+        android:text="RUN"
+        android:textSize="24sp"
+        app:icon="@drawable/icon_run"
+        app:iconPadding="8dp"
+        app:iconSize="44dp"
+        app:iconTint="?attr/colorOnPrimary" />
+
+</com.google.android.material.appbar.MaterialToolbar>
+</merge>
