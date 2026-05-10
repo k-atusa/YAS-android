@@ -12,12 +12,13 @@ res/
     drawable/ #drawable - new - vector asset - search, add
         icon.xml #icon or component xml
     layout/
-        mainview.xml # screen xml
+        mainview.xml #screen xml
     mipmap/ #res - new - image asset - add foreground, background image
     values/
-        themes/ #button, background colors
+        themes/ #general button, background design
         colors.xml
         strings.xml
+        styles.xml #defines component design
     xml/
         config.xml #config for some apps
 build.gradle.kts #file - project structure - dependency - add, version info
