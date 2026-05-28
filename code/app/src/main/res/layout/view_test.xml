@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"> <!-- 다크모드 시 자동으로 어두워지는 핵심 배경 -->
+
+    <!-- 전체 뼈대: 세로 정렬(vbox), 화면 여백 16dp -->
+    <LinearLayout style="@style/vbox" android:padding="16dp">
+
+        <!-- ==========================================
+             1. 타이포그래피 (글자 위계) 테스트
+             ========================================== -->
+        <TextView style="@style/title" android:text="1. 타이포그래피 (Typography)" />
+
+        <LinearLayout style="@style/vbox" android:layout_marginTop="8dp" android:paddingStart="8dp">
+            <TextView style="@style/title" android:text="제목 (Title, title)"/>
+            <TextView style="@style/body" android:text="본문 텍스트입니다. (Body, body)" android:layout_marginTop="4dp" />
+            <TextView style="@style/cap" android:text="부연 설명이나 힌트용 연한 텍스트 (Caption, cap)" android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- 섹션 간격용 공백 -->
+        <View android:layout_width="match_parent" android:layout_height="32dp" />
+
+        <!-- ==========================================
+             2. 컨테이너 (카드) 테스트
+             ========================================== -->
+        <TextView style="@style/title" android:text="2. 컴포넌트 (Components)" />
+
+        <!-- 카드 (배경과 분리되는 SurfaceVariant 색상 적용됨) -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="8dp">
+
+            <LinearLayout style="@style/vbox" android:padding="16dp">
+                <TextView style="@style/body" android:text="카드 컨테이너 내부" android:textStyle="bold"/>
+                <TextView style="@style/cap" android:text="아래에 정보를 입력해주세요." android:layout_marginTop="4dp" />
+
+                <!-- 입력창 (스타일 없이 기본 테마 적용) -->
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="이름을 입력하세요" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 섹션 간격용 공백 -->
+        <View android:layout_width="match_parent" android:layout_height="32dp" />
+
+        <!-- ==========================================
+             3. 액션 버튼 (4종 세트) 테스트
+             ========================================== -->
+        <TextView style="@style/title" android:text="3. 버튼 (Buttons)" />
+        <TextView style="@style/cap" android:text="용도에 따라 알맞은 버튼을 사용하세요." android:layout_marginTop="4dp" />
+
+        <LinearLayout style="@style/vbox" android:layout_marginTop="16dp">
+
+            <!-- 첫 번째 줄: Outlined (테두리) & Primary (메인 강조) -->
+            <LinearLayout style="@style/hbox">
+                <Button style="@style/btnOut" android:text="취소 (btnOut)" />
+                <View style="@style/spacer" /> <!-- 가운데 공간 밀어내기 -->
+                <Button style="@style/btnPri" android:text="저장하기 (btnPri)" android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- 두 번째 줄: Danger (위험) & Secondary (보조) -->
+            <LinearLayout style="@style/hbox" android:layout_marginTop="12dp">
+                <Button style="@style/btnDan" android:text="삭제 (btnDan)" />
+                <View style="@style/spacer" /> <!-- 가운데 공간 밀어내기 -->
+                <Button style="@style/btnSec" android:text="임시 저장 (btnSec)" android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ==========================================
+             4. 테마 자동 적용 위젯 (스타일 태그 없음)
+             ========================================== -->
+        <View android:layout_width="match_parent" android:layout_height="32dp" />
+        <TextView style="@style/title" android:text="4. 자동 테마 위젯 (Auto-styled)" />
+        <TextView style="@style/cap" android:text="스타일 속성을 넣지 않아도 알아서 색이 입혀집니다." android:layout_marginTop="4dp" />
+
+        <LinearLayout style="@style/hbox" android:layout_marginTop="16dp">
+            <TextView style="@style/body" android:text="자동 알림 켜기" />
+            <View style="@style/spacer" />
+            <Switch android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/hbox" android:layout_marginTop="8dp">
+            <CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
+            <TextView style="@style/body" android:text="이용 약관에 동의합니다." />
+        </LinearLayout>
+
+        <!-- 하단 여백 -->
+        <View android:layout_width="match_parent" android:layout_height="48dp" />
+
+    </LinearLayout>
+</ScrollView>

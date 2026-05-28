@@ -1,0 +1,95 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android"> <!-- USAG-STYLE1 R1 -->
+    <!-- 1. Layouts (VBox, HBox, Spacer) -->
+    <style name="vbox">
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="hbox">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="spacer">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <!-- 2. Typography (Title, Body, Caption) -->
+    <style name="title">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+    <style name="body">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+    <style name="cap">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- 3. Buttons (Primary, Secondary, Danger, Outlined) -->
+    <style name="btnPri" parent="Widget.Material3.Button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <style name="btnSec" parent="Widget.Material3.Button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="backgroundTint">?attr/colorSecondary</item>
+        <item name="android:textColor">?attr/colorOnSecondary</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <style name="btnDan" parent="Widget.Material3.Button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="backgroundTint">?attr/colorError</item>
+        <item name="android:textColor">?attr/colorOnError</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <style name="btnOut" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="strokeColor">?attr/colorSurfaceVariant</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <!-- 4. Icons (icon, iconDan) -->
+    <style name="icon">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:tint">?attr/colorOnSurface</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="iconDan" parent="icon">
+        <item name="android:tint">?attr/colorError</item>
+    </style>
+
+    <!-- 5. Components (card) -->
+    <style name="card" parent="Widget.Material3.CardView.Filled">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="cardBackgroundColor">?attr/colorSurfaceVariant</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+</resources>

@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
-    <application
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.K7yas" />
+<application
+    android:allowBackup="true"
+    android:dataExtractionRules="@xml/data_extraction_rules"
+    android:fullBackupContent="@xml/backup_rules"
+    android:icon="@mipmap/ic_launcher"
+    android:label="YAS Android"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:supportsRtl="true"
+    android:theme="@style/Theme.k7yas">
 
+    <activity android:name=".Loginview"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
+        </intent-filter>
+    </activity>
+</application>
 </manifest>
+
+    <!--
+        resource:
+            res - new - image asset - add foreground, background image
+            drawable - new - vector asset - search, add
+        build:
+            file - project structure - dependency - add org.bouncycastle:bcprov-jdk18on com.lambdapioneer.argon2kt:argon2kt
+            build.gradle.kts - set version info
+    -->
