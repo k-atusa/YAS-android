@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/vbox"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="?attr/colorSurface">
+
+    <LinearLayout
+        style="@style/hbox"
+        android:layout_marginTop="24dp"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/text_mode"
+            style="@style/title"
+            android:text="Sign/Verify" />
+        <View style="@style/spacer" />
+        <ImageButton
+            android:id="@+id/button_menu"
+            style="@style/icon"
+            android:src="@drawable/icon_menu"
+            android:contentDescription="Menu" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/card"
+        android:layout_marginTop="16dp">
+
+        <LinearLayout
+            style="@style/vbox"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp">
+
+            <EditText
+                android:id="@+id/edit_pubkey"
+                style="@style/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Public Key (Manual)"
+                android:minLines="3"
+                android:gravity="top"
+                android:background="?attr/colorSurface"
+                android:padding="8dp"
+                android:inputType="textMultiLine"
+                android:autofillHints="none" />
+
+            <Spinner
+                android:id="@+id/select_pubkey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:minHeight="48dp" />
+
+            <TextView
+                android:id="@+id/text_pubkey"
+                style="@style/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Public: Not Selected" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/card"
+        android:layout_marginTop="16dp">
+
+        <LinearLayout
+            style="@style/vbox"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp">
+
+            <LinearLayout style="@style/hbox">
+                <EditText
+                    android:id="@+id/edit_sign"
+                    style="@style/body"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Signature"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:background="?attr/colorSurface"
+                    android:padding="8dp"
+                    android:inputType="textMultiLine"
+                    android:autofillHints="none" />
+
+                <LinearLayout
+                    style="@style/vbox"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp">
+                    <ImageButton
+                        android:id="@+id/button_fetch"
+                        style="@style/icon"
+                        android:src="@drawable/icon_browse"
+                        android:contentDescription="Browse" />
+                    <ImageButton
+                        android:id="@+id/button_save"
+                        style="@style/icon"
+                        android:src="@drawable/icon_download"
+                        android:contentDescription="Save" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/hbox"
+                android:layout_marginTop="8dp">
+                <Button
+                    android:id="@+id/button_file"
+                    style="@style/btnSec"
+                    android:layout_width="wrap_content"
+                    android:text="Get File" />
+                <TextView
+                    android:id="@+id/text_file"
+                    style="@style/body"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Not Selected"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/hbox"
+                android:layout_marginTop="16dp">
+                <Button
+                    android:id="@+id/button_sign"
+                    style="@style/btnPri"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="Sign (MyPriv)" />
+                <View android:layout_width="8dp" android:layout_height="0dp" />
+                <Button
+                    android:id="@+id/button_verify"
+                    style="@style/btnPri"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="Verify" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <View style="@style/spacer" />
+    <TextView
+        android:id="@+id/text_status"
+        style="@style/body"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="64dp"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:text="Sign\nVerify\nReady..." />
+
+</LinearLayout>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="?attr/colorSurface">
+
+    <LinearLayout
+        style="@style/vbox"
+        android:padding="16dp">
+
+        <LinearLayout
+            style="@style/hbox"
+            android:layout_marginTop="24dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/text_mode"
+                style="@style/title"
+                android:text="Decrypt" />
+            <View style="@style/spacer" />
+            <ImageButton
+                android:id="@+id/button_menu"
+                style="@style/icon"
+                android:src="@drawable/icon_menu"
+                android:contentDescription="Menu" />
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                style="@style/vbox"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <EditText
+                    android:id="@+id/edit_cipher"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Cipher (text mode)"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:background="?attr/colorSurface"
+                    android:padding="8dp"
+                    android:inputType="textMultiLine"
+                    android:autofillHints="none" />
+
+                <TextView
+                    android:id="@+id/text_file_status"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="No file selected"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
+
+                <LinearLayout
+                    style="@style/hbox"
+                    android:layout_marginTop="8dp">
+                    <Button
+                        android:id="@+id/button_get_text"
+                        style="@style/btnSec"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:text="Get Text" />
+                    <View android:layout_width="8dp" android:layout_height="0dp" />
+                    <Button
+                        android:id="@+id/button_get_file"
+                        style="@style/btnSec"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:text="Get File" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/text_message"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Public Message will appear here"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                style="@style/vbox"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <EditText
+                    android:id="@+id/input_pw"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:autofillHints="password" />
+
+                <Spinner
+                    android:id="@+id/select_kf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:minHeight="48dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 카드 3: 공개키 및 검증 설정 -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                style="@style/vbox"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <EditText
+                    android:id="@+id/edit_pubkey"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Peer Public Key"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:background="?attr/colorSurface"
+                    android:padding="8dp"
+                    android:inputType="textMultiLine"
+                    android:autofillHints="none" />
+
+                <Spinner
+                    android:id="@+id/select_pubkey"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:minHeight="48dp" />
+
+                <CheckBox
+                    android:id="@+id/check_verify"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Verify Signature" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                style="@style/vbox"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:id="@+id/text_smsg"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:background="?attr/colorSurface"
+                    android:padding="8dp"
+                    android:text="Decrypted Secret Message" />
+
+                <Button
+                    android:id="@+id/button_decrypt"
+                    style="@style/btnPri"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Decrypt" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/text_status"
+            style="@style/body"
+            android:layout_width="match_parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="64dp"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:text="Decrypt\nStatus\nReady..." />
+
+    </LinearLayout>
+</ScrollView>

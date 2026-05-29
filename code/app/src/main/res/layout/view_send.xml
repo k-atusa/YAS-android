@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/vbox"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="?attr/colorSurface">
+
+    <LinearLayout
+        style="@style/hbox"
+        android:layout_marginTop="24dp"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/text_mode"
+            style="@style/title"
+            android:text="Send/Receive" />
+        <View style="@style/spacer" />
+        <ImageButton
+            android:id="@+id/button_menu"
+            style="@style/icon"
+            android:src="@drawable/icon_menu"
+            android:contentDescription="Menu" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/card"
+        android:layout_marginTop="16dp">
+
+        <LinearLayout
+            style="@style/vbox"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp">
+
+            <LinearLayout style="@style/hbox">
+                <Button
+                    android:id="@+id/button_add_files"
+                    style="@style/btnSec"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="Add Files" />
+                <View android:layout_width="4dp" android:layout_height="0dp" />
+                <Button
+                    android:id="@+id/button_add_dir"
+                    style="@style/btnSec"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="Add Folder" />
+                <View android:layout_width="4dp" android:layout_height="0dp" />
+                <Button
+                    android:id="@+id/button_clear"
+                    style="@style/btnDan"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="Clear" />
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="16dp"
+                android:background="?attr/colorSurface"
+                android:scrollbars="vertical">
+
+                <TextView
+                    android:id="@+id/text_filelist"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="No Files Selected..."
+                    android:gravity="top" />
+            </ScrollView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/card"
+        android:layout_marginTop="16dp">
+
+        <LinearLayout
+            style="@style/vbox"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp">
+
+            <EditText
+                android:id="@+id/edit_message"
+                style="@style/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Secret Message"
+                android:minLines="3"
+                android:gravity="top"
+                android:background="?attr/colorSurface"
+                android:padding="8dp"
+                android:inputType="textMultiLine"
+                android:autofillHints="none" />
+
+            <EditText
+                android:id="@+id/input_ip"
+                style="@style/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="IP:port"
+                android:inputType="text"
+                android:maxLines="1"
+                android:autofillHints="none" />
+
+            <EditText
+                android:id="@+id/input_context"
+                style="@style/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Context"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:autofillHints="none" />
+
+            <LinearLayout
+                style="@style/hbox"
+                android:layout_marginTop="16dp">
+                <Button
+                    android:id="@+id/button_send"
+                    style="@style/btnPri"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="Send" />
+                <View android:layout_width="8dp" android:layout_height="0dp" />
+                <Button
+                    android:id="@+id/button_receive"
+                    style="@style/btnPri"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="Receive" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <View style="@style/spacer" />
+    <TextView
+        android:id="@+id/text_status"
+        style="@style/body"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="64dp"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:text="Send\nReceive\nReady..." />
+
+</LinearLayout>

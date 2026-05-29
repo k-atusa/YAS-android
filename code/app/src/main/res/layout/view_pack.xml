@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/vbox"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="?attr/colorSurface">
+
+    <LinearLayout
+        style="@style/hbox"
+        android:layout_marginTop="24dp"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/text_mode"
+            style="@style/title"
+            android:text="Pack/Unpack" />
+        <View style="@style/spacer" />
+        <ImageButton
+            android:id="@+id/button_menu"
+            style="@style/icon"
+            android:src="@drawable/icon_menu"
+            android:contentDescription="Menu" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/card"
+        android:layout_marginTop="24dp">
+
+        <LinearLayout
+            style="@style/vbox"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp">
+
+            <LinearLayout style="@style/hbox">
+                <Button
+                    android:id="@+id/button_add_files"
+                    style="@style/btnSec"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="Add Files" />
+                <View android:layout_width="4dp" android:layout_height="0dp" />
+                <Button
+                    android:id="@+id/button_add_dir"
+                    style="@style/btnSec"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="Add Folder" />
+                <View android:layout_width="4dp" android:layout_height="0dp" />
+                <Button
+                    android:id="@+id/button_clear"
+                    style="@style/btnDan"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="Clear" />
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="16dp"
+                android:background="?attr/colorSurface"
+                android:scrollbars="vertical">
+
+                <TextView
+                    android:id="@+id/text_filelist"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="No Files Selected..."
+                    android:gravity="top" />
+            </ScrollView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        style="@style/hbox"
+        android:layout_marginTop="32dp">
+        <Button
+            android:id="@+id/button_pack"
+            style="@style/btnPri"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="Pack" />
+        <View android:layout_width="8dp" android:layout_height="0dp" />
+        <Button
+            android:id="@+id/button_unpack"
+            style="@style/btnPri"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="Unpack" />
+    </LinearLayout>
+
+    <View style="@style/spacer" />
+    <TextView
+        android:id="@+id/text_status"
+        style="@style/body"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="64dp"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:text="Pack\nUnpack\nReady..." />
+
+</LinearLayout>

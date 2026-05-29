@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/vbox"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="?attr/colorSurface">
+
+    <LinearLayout
+        style="@style/hbox"
+        android:layout_marginTop="24dp"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/text_mode"
+            style="@style/title"
+            android:text="Inline Viewer" />
+        <View style="@style/spacer" />
+        <ImageButton
+            android:id="@+id/button_menu"
+            style="@style/icon"
+            android:src="@drawable/icon_menu"
+            android:contentDescription="Menu" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/hbox"
+        android:layout_marginTop="16dp">
+
+        <Spinner
+            android:id="@+id/select_item"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:minHeight="48dp" />
+
+        <ImageButton
+            android:id="@+id/button_download"
+            style="@style/icon"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/icon_download"
+            android:contentDescription="Download" />
+
+        <ImageButton
+            android:id="@+id/button_clear"
+            style="@style/icon"
+            android:layout_marginStart="4dp"
+            android:src="@drawable/icon_clear"
+            android:contentDescription="Clear" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/card"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp">
+
+            <ScrollView
+                android:id="@+id/scroll_text_viewer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+                <TextView
+                    android:id="@+id/text_viewer"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Text content will be displayed here..." />
+            </ScrollView>
+
+            <ImageView
+                android:id="@+id/image_viewer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                android:contentDescription="Image Viewer" />
+        </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="64dp" />
+</LinearLayout>

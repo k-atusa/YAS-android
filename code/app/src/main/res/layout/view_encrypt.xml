@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="?attr/colorSurface">
+
+    <LinearLayout
+        style="@style/vbox"
+        android:padding="16dp">
+
+        <LinearLayout
+            style="@style/hbox"
+            android:layout_marginTop="24dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/text_mode"
+                style="@style/title"
+                android:text="Encrypt" />
+            <View style="@style/spacer" />
+            <ImageButton
+                android:id="@+id/button_menu"
+                style="@style/icon"
+                android:src="@drawable/icon_menu"
+                android:contentDescription="Menu" />
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                style="@style/vbox"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <LinearLayout style="@style/hbox">
+                    <Button
+                        android:id="@+id/button_add_files"
+                        style="@style/btnSec"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:paddingHorizontal="4dp"
+                        android:text="Add Files" />
+                    <View android:layout_width="4dp" android:layout_height="0dp" />
+                    <Button
+                        android:id="@+id/button_add_dir"
+                        style="@style/btnSec"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:paddingHorizontal="4dp"
+                        android:text="Add Folder" />
+                    <View android:layout_width="4dp" android:layout_height="0dp" />
+                    <Button
+                        android:id="@+id/button_clear"
+                        style="@style/btnDan"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:paddingHorizontal="4dp"
+                        android:text="Clear" />
+                </LinearLayout>
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="16dp"
+                    android:background="?attr/colorSurface"
+                    android:scrollbars="vertical">
+
+                    <TextView
+                        android:id="@+id/text_filelist"
+                        style="@style/body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="No Files Selected..."
+                        android:gravity="top" />
+                </ScrollView>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                style="@style/vbox"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <EditText
+                    android:id="@+id/input_msg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Public Message"
+                    android:maxLines="1"
+                    android:padding="8dp"
+                    android:inputType="text"
+                    android:autofillHints="none" />
+
+                <EditText
+                    android:id="@+id/edit_smsg"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Secret Message"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:background="?attr/colorSurface"
+                    android:padding="8dp"
+                    android:inputType="textMultiLine"
+                    android:autofillHints="none" />
+
+                <CheckBox
+                    android:id="@+id/check_pubkey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Public Key Mode" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                style="@style/vbox"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <Spinner
+                    android:id="@+id/select_kf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:minHeight="48dp" />
+
+                <EditText
+                    android:id="@+id/input_pw"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:autofillHints="password" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                style="@style/vbox"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <EditText
+                    android:id="@+id/edit_pubkey"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Peer Public (Manual)"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:background="?attr/colorSurface"
+                    android:padding="8dp"
+                    android:inputType="textMultiLine"
+                    android:autofillHints="none" />
+
+                <Spinner
+                    android:id="@+id/select_pubkey"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:minHeight="48dp" />
+
+                <CheckBox
+                    android:id="@+id/check_sign"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Sign with MyPriv" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                style="@style/vbox"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp">
+
+                <LinearLayout style="@style/hbox">
+                    <TextView
+                        android:id="@+id/text_result"
+                        style="@style/body"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:minLines="3"
+                        android:gravity="top"
+                        android:background="?attr/colorSurface"
+                        android:padding="8dp"
+                        android:text="Result will appear here..." />
+
+                    <LinearLayout
+                        style="@style/vbox"
+                        android:layout_width="wrap_content"
+                        android:layout_marginStart="8dp">
+                        <ImageButton
+                            android:id="@+id/button_copy"
+                            style="@style/icon"
+                            android:src="@drawable/icon_copy"
+                            android:contentDescription="Copy" />
+                        <ImageButton
+                            android:id="@+id/button_download"
+                            style="@style/icon"
+                            android:src="@drawable/icon_download"
+                            android:contentDescription="Download" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/button_encrypt"
+                    style="@style/btnPri"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Encrypt" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/text_status"
+            style="@style/body"
+            android:layout_width="match_parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="64dp"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:text="Encrypt\nStatus\nReady..." />
+
+    </LinearLayout>
+</ScrollView>
