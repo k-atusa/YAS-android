@@ -56,13 +56,6 @@
                     android:layout_marginTop="8dp"
                     android:minHeight="48dp" />
 
-                <CheckBox
-                    android:id="@+id/check_inmem"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="In-Mem View" />
-
                 <Button
                     android:id="@+id/button_save_config"
                     style="@style/btnPri"

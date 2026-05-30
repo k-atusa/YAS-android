@@ -85,6 +85,13 @@
                     android:text="Public Message will appear here"
                     android:ellipsize="end"
                     android:maxLines="1" />
+
+                <CheckBox
+                    android:id="@+id/check_inmem"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="In-Mem View" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

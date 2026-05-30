@@ -37,6 +37,9 @@ android {
 
 dependencies {
     implementation(libs.appcompat)
+    implementation(libs.argon2kt)
+    implementation(libs.bcprov.jdk18on)
+    implementation(libs.documentfile)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)

@@ -15,13 +15,26 @@
     android:supportsRtl="true"
     android:theme="@style/Theme.k7yas">
 
-    <activity android:name=".Loginview"
+    <activity android:name=".view.LoginView"
         android:exported="true">
         <intent-filter>
             <action android:name="android.intent.action.MAIN"/>
             <category android:name="android.intent.category.LAUNCHER"/>
         </intent-filter>
     </activity>
+
+    <activity android:name=".view.PackView" />
+    <activity android:name=".view.SendView" />
+    <activity android:name=".view.SignView" />
+    <activity android:name=".view.EncryptView" />
+    <activity android:name=".view.DecryptView" />
+    <activity android:name=".view.ConfigView" />
+    <activity android:name=".view.InlineView" />
+
+    <service
+        android:name=".app.SvcYas"
+        android:foregroundServiceType="dataSync"
+        android:exported="false" />
 </application>
 </manifest>
 
