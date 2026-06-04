@@ -86,12 +86,23 @@
                     android:ellipsize="end"
                     android:maxLines="1" />
 
-                <CheckBox
-                    android:id="@+id/check_inmem"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="In-Mem View" />
+                <LinearLayout
+                    style="@style/hbox"
+                    android:layout_marginTop="8dp">
+
+                    <CheckBox
+                        android:id="@+id/check_inmem"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="8dp"
+                        android:text="In-Mem View" />
+
+                    <CheckBox
+                        android:id="@+id/check_pubmode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pubkey Mode" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -131,19 +142,6 @@
                 style="@style/vbox"
                 android:paddingVertical="8dp"
                 android:paddingHorizontal="16dp">
-
-                <EditText
-                    android:id="@+id/edit_pubkey"
-                    style="@style/body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Peer Public Key"
-                    android:minLines="3"
-                    android:gravity="top"
-                    android:background="?attr/colorSurface"
-                    android:padding="8dp"
-                    android:inputType="textMultiLine"
-                    android:autofillHints="none" />
 
                 <Spinner
                     android:id="@+id/select_pubkey"

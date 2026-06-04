@@ -31,19 +31,6 @@
             android:paddingVertical="8dp"
             android:paddingHorizontal="16dp">
 
-            <EditText
-                android:id="@+id/edit_pubkey"
-                style="@style/body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Public Key (Manual)"
-                android:minLines="3"
-                android:gravity="top"
-                android:background="?attr/colorSurface"
-                android:padding="8dp"
-                android:inputType="textMultiLine"
-                android:autofillHints="none" />
-
             <Spinner
                 android:id="@+id/select_pubkey"
                 android:layout_width="match_parent"
