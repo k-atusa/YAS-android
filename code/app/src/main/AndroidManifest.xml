@@ -13,6 +13,7 @@
     android:label="YAS Android"
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
+    android:largeHeap="true"
     android:theme="@style/Theme.k7yas">
 
     <activity android:name=".view.LoginView"
@@ -38,11 +39,11 @@
 </application>
 </manifest>
 
-    <!--
-        resource:
-            res - new - image asset - add foreground, background image
-            drawable - new - vector asset - search, add
-        build:
-            file - project structure - dependency - add org.bouncycastle:bcprov-jdk18on com.lambdapioneer.argon2kt:argon2kt
-            build.gradle.kts - set version info
-    -->
+<!--
+    resource:
+        res - new - image asset - add foreground, background image
+        drawable - new - vector asset - search, add
+    build:
+        file - project structure - dependency - add org.bouncycastle:bcprov-jdk18on com.lambdapioneer.argon2kt:argon2kt
+        build.gradle.kts - set version info
+-->
