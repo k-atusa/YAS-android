@@ -12,8 +12,15 @@ import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.Observer;
 
 import com.example.k7yas.R;
+import com.example.k7yas.engine.Bencode;
+import com.example.k7yas.engine.Bencrypt;
+import com.example.k7yas.engine.Icons;
+import com.example.k7yas.engine.Opsec;
 import com.example.k7yas.engine.Star;
 import com.example.k7yas.engine.Szip;
+import com.example.k7yas.engine.TP1;
+
+import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
 
 import java.io.File;
 import java.io.InputStream;
@@ -101,6 +108,24 @@ public class SvcYas extends Service {
                 case "TASK_UNPACK":
                     handleUnpack(args);
                     break;
+                case "TASK_SEND":
+                    handleSend(args);
+                    break;
+                case "TASK_RECEIVE":
+                    handleReceive(args);
+                    break;
+                case "TASK_ENC_PW":
+                    handleEncPw(args);
+                    break;
+                case "TASK_DEC_PW":
+                    handleDecPw(args);
+                    break;
+                case "TASK_ENC_PUB":
+                    handleEncPub(args);
+                    break;
+                case "TASK_DEC_PUB":
+                    handleDecPub(args);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown action: " + action);
             }
@@ -112,7 +137,14 @@ public class SvcYas extends Service {
         } finally {
             chan.SetInt(0, 0); // set flag as completed
             chan.SetDouble(0, 1.0);
+            cleanTemp();
         }
+
+        // clear dummies
+        Account.ClearDummy();
+        Bencrypt.ClearDummy();
+        Opsec.ClearDummy();
+        TP1.ClearDummy();
     }
 
     // Pack files
@@ -201,6 +233,634 @@ public class SvcYas extends Service {
                     chan.SetDouble(0, 1 - 1 / count);
                 }
             }
+        }
+    }
+
+    // Send files and message
+    private void handleSend(Bundle b) throws Exception {
+        // get targets and parameters
+        ArrayList<IO1.VFile> srcs = b.getParcelableArrayList("srcs", IO1.VFile.class);
+        String addr = b.getString("addr", "127.0.0.1:8002");
+        String secret = b.getString("context", "");
+        String smsg = b.getString("smsg", "");
+
+        String ip = addr;
+        int port = 8002;
+        if (addr.contains(":")) {
+            String[] parts = addr.split(":");
+            ip = parts[0];
+            port = Integer.parseInt(parts[1]);
+        }
+
+        // start connection
+        chan.SetString(0, "Connecting to Peer...");
+        TP1.TCPsocket socket = new TP1.TCPsocket();
+        try {
+            // make connection, prepare temp files
+            socket.MakeConnection(ip, port);
+            int mode = TP1.SYM_GCMX1 | TP1.HASH_ARG2 | TP1.ASYM_PQC1; // arg2, pqc1, gcmx1
+            if (srcs == null || srcs.isEmpty()) {
+                mode |= TP1.MODE_MSGONLY;
+            }
+            chan.SetDouble(0, 0.1); // connection is 10%
+            File tempPack = new File(getFilesDir(), "archive.temp");
+            File tempCrypto = new File(getFilesDir(), "crypto.temp");
+
+            // pack with zip1
+            long size = 0;
+            if (srcs != null && !srcs.isEmpty()) {
+                chan.SetString(0, "Packing targets to ZIP...");
+                try (Szip.ZipWriter zw = new Szip.ZipWriter()) {
+                    zw.Open(tempPack, true);
+                    for (IO1.VFile f : srcs) {
+                        try (InputStream is = f.OpenReader(this)) {
+                            zw.Write(f.GetName(this), is);
+                        }
+                    }
+                }
+                size = tempPack.length(); // update zip file size
+            }
+            chan.SetDouble(0, 0.2); // packing is 20%
+
+            // load secret, TP1 protocol
+            byte[] secretBytes = Bencode.NormPW(secret);
+            TP1 tp1 = new TP1(mode, false, true, secretBytes, socket.Conn);
+            if (secretBytes != null) {
+                java.util.Arrays.fill(secretBytes, (byte) 0);
+            }
+
+            // status checker thread
+            java.util.concurrent.atomic.AtomicBoolean stopMonitor = new java.util.concurrent.atomic.AtomicBoolean(false);
+            Thread monitorThread = new Thread(() -> {
+                while (!stopMonitor.get()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                    long[] status = tp1.GetStatus();
+                    long stage = status[0];
+                    long sentBytes = status[1];
+                    long totalBytes = status[2];
+
+                    if (stage == TP1.STAGE_HANDSHAKE) {
+                        chan.SetString(0, "Handshaking with peer...");
+                    } else if (stage == TP1.STAGE_ENCRYPTING) {
+                        chan.SetString(0, "Encrypting payloads...");
+                    } else if (stage == TP1.STAGE_TRANSFERRING) {
+                        chan.SetString(0, "Transferring encrypted stream...");
+                        if (totalBytes > 0) {
+                            chan.SetDouble(0, 0.2 + 0.8 * ((double) sentBytes / totalBytes));
+                        }
+                    }
+                }
+            });
+            monitorThread.start();
+
+            // TP1 send
+            TP1.TP1Result result = null;
+            if (srcs == null || srcs.isEmpty()) {
+                try (InputStream emptySrc = new java.io.ByteArrayInputStream(new byte[0])) {
+                    result = tp1.Send(emptySrc, 0, smsg, tempCrypto);
+                }
+            } else {
+                try (InputStream fis = new java.io.FileInputStream(tempPack)) {
+                    result = tp1.Send(fis, size, smsg, tempCrypto);
+                }
+            }
+            stopMonitor.set(true); // stop monitor thread
+            monitorThread.interrupt();
+
+            // delete temp files, get results
+            if (tempPack.exists()) tempPack.delete();
+            if (tempCrypto.exists()) tempCrypto.delete();
+            if (result != null) {
+                chan.SetString(2, "From " + Opsec.Crc32(result.FromPub) + " To " + Opsec.Crc32(result.ToPub)); // chan 2 to show transfer info
+                if (result.Err != null) { throw result.Err; }
+            }
+
+        } finally {
+            socket.Close();
+        }
+    }
+
+    // Receive files and message
+    private void handleReceive(Bundle b) throws Exception {
+        // get parameters
+        String portStr = b.getString("port", "8002");
+        int port = 8002;
+        try {
+            port = Integer.parseInt(portStr);
+        } catch (NumberFormatException e) {
+            port = b.getInt("port", 8002);
+        }
+        String secret = b.getString("context", "");
+
+        // prepare temp files
+        chan.SetString(0, "Waiting for Peer Connection...");
+        TP1.TCPsocket socket = new TP1.TCPsocket();
+        File tempCrypto = new File(getFilesDir(), "crypto.temp");
+        File tempPack = new File(getFilesDir(), "archive.temp");
+        TP1.TP1Result result = null;
+
+        try {
+            // make connection
+            socket.MakeListener(port);
+            byte[] secretBytes = Bencode.NormPW(secret);
+            TP1 tp1 = new TP1(0, false, true, secretBytes, socket.Conn);
+            if (secretBytes != null) {
+                java.util.Arrays.fill(secretBytes, (byte) 0);
+            }
+            chan.SetDouble(0, 0.1); // connection is 10%
+
+            // status monitor thread
+            java.util.concurrent.atomic.AtomicBoolean stopMonitor = new java.util.concurrent.atomic.AtomicBoolean(false);
+            Thread monitorThread = new Thread(() -> {
+                while (!stopMonitor.get()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                    long[] status = tp1.GetStatus();
+                    long stage = status[0];
+                    long receivedBytes = status[1];
+                    long totalBytes = status[2];
+
+                    if (stage == TP1.STAGE_HANDSHAKE) {
+                        chan.SetString(0, "Handshaking with peer...");
+                    } else if (stage == TP1.STAGE_TRANSFERRING) {
+                        chan.SetString(0, "Receiving encrypted stream...");
+                        if (totalBytes > 0) {
+                            chan.SetDouble(0, 0.1 + 0.8 * ((double) receivedBytes / totalBytes));
+                        }
+                    } else if (stage == TP1.STAGE_ENCRYPTING) {
+                        chan.SetString(0, "Decrypting payloads...");
+                        chan.SetDouble(0, 0.8);
+                    }
+                }
+            });
+            monitorThread.start();
+
+            // TP1 receive
+            try (OutputStream fos = new java.io.FileOutputStream(tempPack)) {
+                result = tp1.Receive(fos, tempCrypto);
+            } finally {
+                stopMonitor.set(true);
+                monitorThread.interrupt();
+            }
+
+            // get results, set smsg
+            if (result == null) {
+                throw new Exception("TP1 result is null");
+            } else {
+                chan.SetString(2, "From " + Opsec.Crc32(result.FromPub) + " To " + Opsec.Crc32(result.ToPub)); // chan 2 to show transfer info
+                if (result.Err != null) { throw result.Err; }
+                if (result.Smsg != null && !result.Smsg.isEmpty()) { chan.SetString(3, result.Smsg); } // chan 3 to show smsg
+            }
+
+            // unpack zip if file mode
+            if ((tp1.Mode & TP1.MODE_MSGONLY) == 0) {
+                chan.SetString(0, "Unpacking received files...");
+                try (Szip.ZipReader zr = new Szip.ZipReader()) {
+                    zr.Open(tempPack);
+                    for (int i = 0; i < zr.Names.size(); i++) {
+                        IO1.VFile target = IO1.CreateDownloadsFile(this, zr.Names.get(i));
+                        if (target != null) {
+                            try (OutputStream os = target.OpenWriter(this, false); InputStream is = zr.Open(i)) {
+                                is.transferTo(os);
+                            }
+                        }
+                    }
+                }
+            }
+            chan.SetDouble(0, 1.0);
+
+        } finally {
+            if (tempCrypto.exists()) tempCrypto.delete();
+            if (tempPack.exists()) tempPack.delete();
+            socket.Close();
+        }
+    }
+
+    // Encrypt with password
+    private void handleEncPw(Bundle b) throws Exception {
+        // get parameters
+        ArrayList<IO1.VFile> srcs = b.getParcelableArrayList("srcs", IO1.VFile.class);
+        byte[] maskedPw = b.getByteArray("password");
+        String kfName = b.getString("keyfile", "");
+        String smsg = b.getString("smsg", "");
+        String msg = b.getString("msg", "");
+
+        Account account = Account.GetAccount(this);
+        Bencrypt.Masker masker = Bencrypt.Masker.GetMasker();
+        byte[] unmaskedPw = null;
+        byte[] unmaskedKf = null;
+
+        try {
+            // unmask pw kf
+            unmaskedPw = masker.XOR(maskedPw);
+            if (!kfName.isEmpty()) unmaskedKf = masker.XOR(account.KeyFiles.get(kfName));
+
+            if (srcs == null || srcs.isEmpty()) { // msg-only mode
+                chan.SetString(0, "Encrypting secure message...");
+                Opsec ops = new Opsec();
+                ops.Reset();
+                ops.Msg = msg;
+                ops.Smsg = smsg;
+
+                byte[] header = ops.Encpw("arg2", unmaskedPw, unmaskedKf); // always use arg2
+                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                ops.Write(baos, header);
+                String txtRes = Bencode.Encode64(baos.toByteArray(), "#", 80, 10);
+                chan.SetString(3, txtRes); // chan 3 to return cipher-msg
+
+            } else { // file mode
+                chan.SetString(0, "Packing files to archive...");
+                long zsize = packFiles(srcs);
+                chan.SetDouble(0, 0.25); // packing is 25%
+
+                // make header
+                chan.SetString(0, "Creating encryption header...");
+                IO1.VFile dst = IO1.CreateDownloadsFile(this, "encrypted." + account.ImgType);
+                if (dst == null) throw new java.io.IOException("Failed to create download file");
+                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster("gcmx1", new byte[44]);
+
+                Opsec ops = new Opsec();
+                ops.Reset();
+                ops.Msg = msg;
+                ops.Smsg = smsg;
+                ops.BodySize = dummySm.AfterSize(zsize);
+                ops.BodyAlgo = "gcmx1"; // always use gcmx1
+                ops.BodyInfo = account.PackType.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+                byte[] header = ops.Encpw("arg2", unmaskedPw, unmaskedKf);
+                Bencrypt.SymMaster sm = new Bencrypt.SymMaster(ops.BodyAlgo, ops.BodyKey);
+                java.util.Arrays.fill(ops.BodyKey, (byte) 0);
+
+                long totalWritten = 0;
+                try (OutputStream out = dst.OpenWriter(this, false)) {
+                    // write prehead
+                    byte[] prehead = null;
+                    if (account.ImgType.equals("webp")) {
+                        prehead = Icons.AesWebp.clone();
+                    } else if (account.ImgType.equals("png")) {
+                        prehead = Icons.AesPng.clone();
+                    }
+                    if (prehead != null) {
+                        int alignmentPadding = (128 - (prehead.length % 128)) % 128;
+                        if (alignmentPadding > 0) {
+                            byte[] balancedPrehead = new byte[prehead.length + alignmentPadding];
+                            System.arraycopy(prehead, 0, balancedPrehead, 0, prehead.length);
+                            prehead = balancedPrehead;
+                        }
+                        out.write(prehead);
+                        totalWritten += prehead.length;
+                    }
+
+                    // write opsec header
+                    ops.Write(out, header);
+                    long headerLenBytes = 4 + 2 + header.length;
+                    if (header.length >= 65535) {
+                        headerLenBytes += 2;
+                    }
+                    totalWritten += headerLenBytes;
+                    chan.SetDouble(0, 0.50); // header is 25%
+
+                    chan.SetString(0, "Encrypting archive payload...");
+                    long cryptoBodySize = encFile(sm, out);
+                    totalWritten += cryptoBodySize;
+                    chan.SetDouble(0, 0.75); // body encryption is 25%
+
+                    chan.SetString(0, "Applying padding...");
+                    long padLen = Opsec.PadLen(totalWritten);
+                    if (padLen > 0) {
+                        Opsec.PadFile(out, padLen);
+                    }
+                }
+            }
+        } finally {
+            if (unmaskedPw != null) java.util.Arrays.fill(unmaskedPw, (byte) 0);
+            if (unmaskedKf != null) java.util.Arrays.fill(unmaskedKf, (byte) 0);
+        }
+    }
+
+    // Decrypt with password
+    private void handleDecPw(Bundle b) throws Exception {
+        // get parameters
+        ArrayList<IO1.VFile> srcs = b.getParcelableArrayList("srcs", IO1.VFile.class);
+        byte[] maskedPw = b.getByteArray("password");
+        String kfName = b.getString("keyfile", "");
+        String text = b.getString("text", "");
+
+        Account account = Account.GetAccount(this);
+        Bencrypt.Masker masker = Bencrypt.Masker.GetMasker();
+        byte[] unmaskedPw = null;
+        byte[] unmaskedKf = null;
+
+        try {
+            // unmask pw kf
+            unmaskedPw = masker.XOR(maskedPw);
+            if (!kfName.isEmpty()) unmaskedKf = masker.XOR(account.KeyFiles.get(kfName));
+
+            if (srcs == null || srcs.isEmpty()) { // msg-only mode
+                chan.SetString(0, "Decoding secure message...");
+                byte[] data;
+                if (text.contains("#")) {
+                    data = Bencode.Decode64(text, "#");
+                } else {
+                    data = Bencode.Decode64(text, "");
+                }
+
+                Opsec ops = new Opsec();
+                ops.Reset();
+                try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
+                    byte[] header = ops.Read(bais, 0);
+                    ops.View(header);
+                    ops.Decpw(unmaskedPw, unmaskedKf);
+                }
+                if (ops.Msg != null) chan.SetString(2, ops.Msg); // chan 2 for msg
+                if (ops.Smsg != null) chan.SetString(3, ops.Smsg); // chan 3 for smsg
+
+            } else { // file mode
+                chan.SetString(0, "Reading encrypted file header...");
+                IO1.VFile srcFile = srcs.get(0); // decrypt first file
+                Opsec ops = new Opsec();
+                ops.Reset();
+
+                try (InputStream is = srcFile.OpenReader(this)) {
+                    byte[] header = ops.Read(is, 0);
+                    ops.View(header);
+                    ops.Decpw(unmaskedPw, unmaskedKf);
+                    if (ops.Msg != null) chan.SetString(2, ops.Msg); // chan 2 for msg
+                    if (ops.Smsg != null) chan.SetString(3, ops.Smsg); // chan 3 for smsg
+
+                    chan.SetString(0, "Decrypting archive payload...");
+                    Bencrypt.SymMaster sm = new Bencrypt.SymMaster(ops.BodyAlgo, ops.BodyKey);
+                    java.util.Arrays.fill(ops.BodyKey, (byte) 0);
+                    decFile(sm, is, ops.BodySize);
+                    chan.SetDouble(0, 0.5);
+                }
+
+                // unpack if required
+                if (ops.BodyInfo != null && ops.BodyInfo.length > 0) {
+                    chan.SetString(0, "Unpacking decrypted files...");
+                    unpackFiles();
+                }
+            }
+        } finally {
+            if (unmaskedPw != null) java.util.Arrays.fill(unmaskedPw, (byte) 0);
+            if (unmaskedKf != null) java.util.Arrays.fill(unmaskedKf, (byte) 0);
+        }
+    }
+
+    // Encrypt with public key
+    private void handleEncPub(Bundle b) throws Exception {
+        // get parameters
+        ArrayList<IO1.VFile> srcs = b.getParcelableArrayList("srcs", IO1.VFile.class);
+        String pubName = b.getString("pubName", "");
+        boolean doSign = b.getBoolean("doSign", false);
+        String smsg = b.getString("smsg", "");
+        String msg = b.getString("msg", "");
+
+        Account account = Account.GetAccount(this);
+        Bencrypt.Masker masker = Bencrypt.Masker.GetMasker();
+        byte[] unmaskedPri = null;
+
+        try {
+            // get peer public and my private
+            byte[] peerPub = account.PubKeys.get(pubName);
+            if (doSign) unmaskedPri = masker.XOR(account.PriKey);
+
+            if (srcs == null || srcs.isEmpty()) { // msg-only mode
+                chan.SetString(0, "Encrypting secure message...");
+                Opsec ops = new Opsec();
+                ops.Reset();
+                ops.Msg = msg;
+                ops.Smsg = smsg;
+
+                byte[] header = ops.Encpub(account.KeyType, peerPub, unmaskedPri);
+                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                ops.Write(baos, header);
+                String txtRes = Bencode.Encode64(baos.toByteArray(), "#", 80, 10);
+                chan.SetString(3, txtRes); // chan 3 to return cipher-msg
+
+            } else { // file mode
+                chan.SetString(0, "Packing files to archive...");
+                long zsize = packFiles(srcs);
+                chan.SetDouble(0, 0.25); // packing is 25%
+
+                // make header
+                chan.SetString(0, "Creating encryption header...");
+                IO1.VFile dst = IO1.CreateDownloadsFile(this, "encrypted." + account.ImgType);
+                if (dst == null) throw new java.io.IOException("Failed to create download file");
+                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster("gcmx1", new byte[44]);
+
+                Opsec ops = new Opsec();
+                ops.Reset();
+                ops.Msg = msg;
+                ops.Smsg = smsg;
+                ops.BodySize = dummySm.AfterSize(zsize);
+                ops.BodyAlgo = "gcmx1"; // always use gcmx1
+                ops.BodyInfo = account.PackType.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+                byte[] header = ops.Encpub(account.KeyType, peerPub, unmaskedPri);
+                Bencrypt.SymMaster sm = new Bencrypt.SymMaster(ops.BodyAlgo, ops.BodyKey);
+                java.util.Arrays.fill(ops.BodyKey, (byte) 0);
+
+                long totalWritten = 0;
+                try (OutputStream out = dst.OpenWriter(this, false)) {
+                    // get prehead
+                    byte[] prehead = null;
+                    if (account.ImgType.equals("webp")) {
+                        prehead = Icons.CloudWebp.clone();
+                    } else if (account.ImgType.equals("png")) {
+                        prehead = Icons.CloudPng.clone();
+                    }
+                    if (prehead != null) {
+                        int alignmentPadding = (128 - (prehead.length % 128)) % 128;
+                        if (alignmentPadding > 0) {
+                            byte[] balancedPrehead = new byte[prehead.length + alignmentPadding];
+                            System.arraycopy(prehead, 0, balancedPrehead, 0, prehead.length);
+                            prehead = balancedPrehead;
+                        }
+                        out.write(prehead);
+                        totalWritten += prehead.length;
+                    }
+
+                    // write opsec header
+                    ops.Write(out, header);
+                    long headerLenBytes = 4 + 2 + header.length;
+                    if (header.length >= 65535) {
+                        headerLenBytes += 2;
+                    }
+                    totalWritten += headerLenBytes;
+                    chan.SetDouble(0, 0.50); // header is 25%
+
+                    chan.SetString(0, "Encrypting archive payload...");
+                    long cryptoBodySize = encFile(sm, out);
+                    totalWritten += cryptoBodySize;
+                    chan.SetDouble(0, 0.75); // body encryption is 25%
+
+                    chan.SetString(0, "Applying padding...");
+                    long padLen = Opsec.PadLen(totalWritten);
+                    if (padLen > 0) {
+                        Opsec.PadFile(out, padLen);
+                    }
+                }
+            }
+        } finally {
+            if (unmaskedPri != null) java.util.Arrays.fill(unmaskedPri, (byte) 0);
+        }
+    }
+
+    // Decrypt with private key
+    private void handleDecPub(Bundle b) throws Exception {
+        // get parameters
+        ArrayList<IO1.VFile> srcs = b.getParcelableArrayList("srcs", IO1.VFile.class);
+        String pubName = b.getString("pubName", "");
+        String text = b.getString("text", "");
+        Account account = Account.GetAccount(this);
+        Bencrypt.Masker masker = Bencrypt.Masker.GetMasker();
+        byte[] unmaskedPri = null;
+
+        try {
+            // get myPriv, myPub, peerPub
+            unmaskedPri = masker.XOR(account.PriKey);
+            byte[] peerPub = !pubName.isEmpty() ? account.PubKeys.get(pubName) : null;
+            byte[] myPub = (peerPub != null) ? account.PubKey : null;
+
+            if (srcs == null || srcs.isEmpty()) { // msg-only mode
+                chan.SetString(0, "Decoding secure message...");
+                byte[] data;
+                if (text.contains("#")) {
+                    data = Bencode.Decode64(text, "#");
+                } else {
+                    data = Bencode.Decode64(text, "");
+                }
+
+                Opsec ops = new Opsec();
+                ops.Reset();
+                try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
+                    byte[] header = ops.Read(bais, 0);
+                    ops.View(header);
+                    ops.Decpub(unmaskedPri, myPub, peerPub);
+                }
+                if (ops.Msg != null) chan.SetString(2, ops.Msg); // chan 2 for msg
+                if (ops.Smsg != null) chan.SetString(3, ops.Smsg); // chan 3 for smsg
+
+            } else { // file mode
+                chan.SetString(0, "Reading encrypted file header...");
+                IO1.VFile srcFile = srcs.get(0); // decrypt first file
+                Opsec ops = new Opsec();
+                ops.Reset();
+
+                try (InputStream is = srcFile.OpenReader(this)) {
+                    byte[] header = ops.Read(is, 0);
+                    ops.View(header);
+                    ops.Decpub(unmaskedPri, myPub, peerPub);
+                    if (ops.Msg != null) chan.SetString(2, ops.Msg); // chan 2 for msg
+                    if (ops.Smsg != null) chan.SetString(3, ops.Smsg); // chan 3 for smsg
+
+                    chan.SetString(0, "Decrypting archive payload...");
+                    Bencrypt.SymMaster sm = new Bencrypt.SymMaster(ops.BodyAlgo, ops.BodyKey);
+                    java.util.Arrays.fill(ops.BodyKey, (byte) 0);
+                    decFile(sm, is, ops.BodySize);
+                    chan.SetDouble(0, 0.5);
+                }
+
+                // unpack if required
+                if (ops.BodyInfo != null && ops.BodyInfo.length > 0) {
+                    chan.SetString(0, "Unpacking decrypted files...");
+                    unpackFiles();
+                }
+            }
+        } finally {
+            if (unmaskedPri != null) java.util.Arrays.fill(unmaskedPri, (byte) 0);
+        }
+    }
+
+    // helpers
+    private long packFiles(ArrayList<IO1.VFile> srcs) throws Exception {
+        Account account = Account.GetAccount(this);
+        File temp = new File(getFilesDir(), "archive.temp");
+
+        if (account.PackType.equals("zip1")) { // zip1
+            try (Szip.ZipWriter zw = new Szip.ZipWriter()) {
+                zw.Open(temp, true);
+                for (IO1.VFile f : srcs) {
+                    try (InputStream is = f.OpenReader(this)) {
+                        zw.Write(f.GetName(this), is);
+                    }
+                }
+            }
+
+        } else { // tar1
+            try (OutputStream out = new java.io.FileOutputStream(temp); Star.TarWriter tw = new Star.TarWriter()) {
+                tw.Open(out);
+                for (IO1.VFile f : srcs) {
+                    try (InputStream is = f.OpenReader(this)) {
+                        tw.Write(f.GetName(this), is, f.GetSize(this), 0644, f.IsDir(this));
+                    }
+                }
+            }
+        }
+        return temp.length(); // return packed file size
+    }
+
+    private void unpackFiles() throws Exception {
+        Account account = Account.GetAccount(this);
+        File temp = new File(getFilesDir(), "archive.temp");
+
+        if (account.PackType.equals("zip1")) { // zip1
+            try (Szip.ZipReader zr = new Szip.ZipReader()) {
+                zr.Open(temp);
+                for (int i = 0; i < zr.Names.size(); i++) {
+                    IO1.VFile target = IO1.CreateDownloadsFile(this, zr.Names.get(i));
+                    if (target != null) {
+                        try (OutputStream os = target.OpenWriter(this, false); InputStream is = zr.Open(i)) {
+                            is.transferTo(os);
+                        }
+                    }
+                }
+            }
+
+        } else { // tar1
+            try (InputStream is = new java.io.FileInputStream(temp); Star.TarReader tr = new Star.TarReader()) {
+                tr.Open(is);
+                while (tr.Next()) {
+                    IO1.VFile target = IO1.CreateDownloadsFile(this, tr.Name);
+                    if (target != null) {
+                        try (OutputStream os = target.OpenWriter(this, false)) {
+                            tr.Mkfile(os);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private long encFile(Bencrypt.SymMaster sm, OutputStream dst) throws Exception {
+        File temp = new File(getFilesDir(), "archive.temp");
+        long fsize = temp.length();
+        try (InputStream fis = new java.io.FileInputStream(temp)) {
+            sm.EnFile(fis, fsize, dst);
+        }
+        return sm.AfterSize(fsize); // return crypto size
+    }
+
+    private void decFile(Bencrypt.SymMaster sm, InputStream src, long size) throws Exception {
+        File temp = new File(getFilesDir(), "archive.temp");
+        try (OutputStream fos = new java.io.FileOutputStream(temp)) {
+            sm.DeFile(src, size, fos);
+        }
+    }
+
+    private void cleanTemp() {
+        String[] temps = {"archive.temp", "crypto.temp"};
+        for (String name : temps) {
+            File f = new File(getFilesDir(), name);
+            if (f.exists()) f.delete();
         }
     }
 }

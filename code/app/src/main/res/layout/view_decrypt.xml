@@ -86,23 +86,12 @@
                     android:ellipsize="end"
                     android:maxLines="1" />
 
-                <LinearLayout
-                    style="@style/hbox"
-                    android:layout_marginTop="8dp">
-
-                    <CheckBox
-                        android:id="@+id/check_inmem"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="8dp"
-                        android:text="In-Mem View" />
-
-                    <CheckBox
-                        android:id="@+id/check_pubmode"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pubkey Mode" />
-                </LinearLayout>
+                <CheckBox
+                    android:id="@+id/check_pubmode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Pubkey Mode" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

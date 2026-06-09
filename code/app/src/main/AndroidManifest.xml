@@ -30,7 +30,6 @@
     <activity android:name=".view.EncryptView" />
     <activity android:name=".view.DecryptView" />
     <activity android:name=".view.ConfigView" />
-    <activity android:name=".view.InlineView" />
 
     <service
         android:name=".app.SvcYas"
