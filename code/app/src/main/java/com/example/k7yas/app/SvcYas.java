@@ -286,7 +286,7 @@ public class SvcYas extends Service {
             byte[] secretBytes = Bencode.NormPW(secret);
             TP1 tp1 = new TP1(mode, false, true, secretBytes, socket.Conn);
             if (secretBytes != null) {
-                java.util.Arrays.fill(secretBytes, (byte) 0);
+                Account.sclear(secretBytes);
             }
 
             // status checker thread
@@ -369,7 +369,7 @@ public class SvcYas extends Service {
             byte[] secretBytes = Bencode.NormPW(secret);
             TP1 tp1 = new TP1(0, false, true, secretBytes, socket.Conn);
             if (secretBytes != null) {
-                java.util.Arrays.fill(secretBytes, (byte) 0);
+                Account.sclear(secretBytes);
             }
             chan.SetDouble(0, 0.1); // connection is 10%
 
@@ -496,7 +496,7 @@ public class SvcYas extends Service {
 
                 byte[] header = ops.Encpw("arg2", unmaskedPw, unmaskedKf);
                 Bencrypt.SymMaster sm = new Bencrypt.SymMaster(ops.BodyAlgo, ops.BodyKey);
-                java.util.Arrays.fill(ops.BodyKey, (byte) 0);
+                Account.sclear(ops.BodyKey);
 
                 long totalWritten = 0;
                 try (OutputStream out = dst.OpenWriter(this, false)) {
@@ -540,15 +540,15 @@ public class SvcYas extends Service {
                 }
             }
         } finally {
-            if (unmaskedPw != null) java.util.Arrays.fill(unmaskedPw, (byte) 0);
-            if (unmaskedKf != null) java.util.Arrays.fill(unmaskedKf, (byte) 0);
+            if (unmaskedPw != null) Account.sclear(unmaskedPw);
+            if (unmaskedKf != null) Account.sclear(unmaskedKf);
         }
     }
 
     // Decrypt with password
     private void handleDecPw(Bundle b) throws Exception {
         // get parameters
-        ArrayList<IO1.VFile> srcs = b.getParcelableArrayList("srcs", IO1.VFile.class);
+        IO1.VFile srcFile = b.getParcelable("src", IO1.VFile.class);
         byte[] maskedPw = b.getByteArray("password");
         String kfName = b.getString("keyfile", "");
         String text = b.getString("text", "");
@@ -563,7 +563,7 @@ public class SvcYas extends Service {
             unmaskedPw = masker.XOR(maskedPw);
             if (!kfName.isEmpty()) unmaskedKf = masker.XOR(account.KeyFiles.get(kfName));
 
-            if (srcs == null || srcs.isEmpty()) { // msg-only mode
+            if (srcFile == null) { // msg-only mode
                 chan.SetString(0, "Decoding secure message...");
                 byte[] data;
                 if (text.contains("#")) {
@@ -584,7 +584,6 @@ public class SvcYas extends Service {
 
             } else { // file mode
                 chan.SetString(0, "Reading encrypted file header...");
-                IO1.VFile srcFile = srcs.get(0); // decrypt first file
                 Opsec ops = new Opsec();
                 ops.Reset();
 
@@ -597,7 +596,7 @@ public class SvcYas extends Service {
 
                     chan.SetString(0, "Decrypting archive payload...");
                     Bencrypt.SymMaster sm = new Bencrypt.SymMaster(ops.BodyAlgo, ops.BodyKey);
-                    java.util.Arrays.fill(ops.BodyKey, (byte) 0);
+                    Account.sclear(ops.BodyKey);
                     decFile(sm, is, ops.BodySize);
                     chan.SetDouble(0, 0.5);
                 }
@@ -609,8 +608,8 @@ public class SvcYas extends Service {
                 }
             }
         } finally {
-            if (unmaskedPw != null) java.util.Arrays.fill(unmaskedPw, (byte) 0);
-            if (unmaskedKf != null) java.util.Arrays.fill(unmaskedKf, (byte) 0);
+            if (unmaskedPw != null) Account.sclear(unmaskedPw);
+            if (unmaskedKf != null) Account.sclear(unmaskedKf);
         }
     }
 
@@ -666,7 +665,7 @@ public class SvcYas extends Service {
 
                 byte[] header = ops.Encpub(account.KeyType, peerPub, unmaskedPri);
                 Bencrypt.SymMaster sm = new Bencrypt.SymMaster(ops.BodyAlgo, ops.BodyKey);
-                java.util.Arrays.fill(ops.BodyKey, (byte) 0);
+                Account.sclear(ops.BodyKey);
 
                 long totalWritten = 0;
                 try (OutputStream out = dst.OpenWriter(this, false)) {
@@ -710,14 +709,14 @@ public class SvcYas extends Service {
                 }
             }
         } finally {
-            if (unmaskedPri != null) java.util.Arrays.fill(unmaskedPri, (byte) 0);
+            if (unmaskedPri != null) Account.sclear(unmaskedPri);
         }
     }
 
     // Decrypt with private key
     private void handleDecPub(Bundle b) throws Exception {
         // get parameters
-        ArrayList<IO1.VFile> srcs = b.getParcelableArrayList("srcs", IO1.VFile.class);
+        IO1.VFile srcFile = b.getParcelable("src", IO1.VFile.class);
         String pubName = b.getString("pubName", "");
         String text = b.getString("text", "");
         Account account = Account.GetAccount(this);
@@ -730,7 +729,7 @@ public class SvcYas extends Service {
             byte[] peerPub = !pubName.isEmpty() ? account.PubKeys.get(pubName) : null;
             byte[] myPub = (peerPub != null) ? account.PubKey : null;
 
-            if (srcs == null || srcs.isEmpty()) { // msg-only mode
+            if (srcFile == null) { // msg-only mode
                 chan.SetString(0, "Decoding secure message...");
                 byte[] data;
                 if (text.contains("#")) {
@@ -751,7 +750,6 @@ public class SvcYas extends Service {
 
             } else { // file mode
                 chan.SetString(0, "Reading encrypted file header...");
-                IO1.VFile srcFile = srcs.get(0); // decrypt first file
                 Opsec ops = new Opsec();
                 ops.Reset();
 
@@ -764,7 +762,7 @@ public class SvcYas extends Service {
 
                     chan.SetString(0, "Decrypting archive payload...");
                     Bencrypt.SymMaster sm = new Bencrypt.SymMaster(ops.BodyAlgo, ops.BodyKey);
-                    java.util.Arrays.fill(ops.BodyKey, (byte) 0);
+                    Account.sclear(ops.BodyKey);
                     decFile(sm, is, ops.BodySize);
                     chan.SetDouble(0, 0.5);
                 }
@@ -776,7 +774,7 @@ public class SvcYas extends Service {
                 }
             }
         } finally {
-            if (unmaskedPri != null) java.util.Arrays.fill(unmaskedPri, (byte) 0);
+            if (unmaskedPri != null) Account.sclear(unmaskedPri);
         }
     }
 

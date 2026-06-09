@@ -143,6 +143,7 @@
                     style="@style/body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:hint="Password"
                     android:inputType="textPassword"
                     android:autofillHints="password" />
@@ -193,8 +194,7 @@
                         android:minLines="3"
                         android:gravity="top"
                         android:background="?attr/colorSurface"
-                        android:padding="8dp"
-                        android:text="Result will appear here..." />
+                        android:padding="8dp"/>
 
                     <LinearLayout
                         style="@style/vbox"

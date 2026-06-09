@@ -49,13 +49,6 @@
                     android:layout_marginTop="8dp"
                     android:minHeight="48dp" />
 
-                <Spinner
-                    android:id="@+id/select_enc_type"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:minHeight="48dp" />
-
                 <Button
                     android:id="@+id/button_save_config"
                     style="@style/btnPri"
@@ -85,6 +78,17 @@
                     android:background="?attr/colorSurface"
                     android:padding="8dp"
                     android:inputType="textMultiLine"
+                    android:autofillHints="none" />
+
+                <EditText
+                    android:id="@+id/input_pubkey_name"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Public Key Name"
+                    android:inputType="text"
+                    android:maxLines="1"
                     android:autofillHints="none" />
 
                 <Spinner
@@ -142,6 +146,17 @@
                         android:ellipsize="end"
                         android:maxLines="1" />
                 </LinearLayout>
+
+                <EditText
+                    android:id="@+id/input_kf_name"
+                    style="@style/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Key File Name"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:autofillHints="none" />
 
                 <Spinner
                     android:id="@+id/select_kf"

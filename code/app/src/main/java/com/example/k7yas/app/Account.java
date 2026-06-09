@@ -19,7 +19,7 @@ import java.util.Map;
 public class Account implements Serializable {
     private static volatile Object DUMMY;
 
-    private static void sclear(byte[] data) {
+    public static void sclear(byte[] data) {
         java.util.Arrays.fill(data, (byte) 0);
         DUMMY = data;
     }
@@ -44,7 +44,6 @@ public class Account implements Serializable {
     // Settings
     public String PackType;
     public String ImgType;
-    public String EncType;
 
     // Account Data
     public String KeyType;
@@ -65,7 +64,6 @@ public class Account implements Serializable {
         // set basic values
         this.PackType = "zip1";
         this.ImgType = "webp";
-        this.EncType = "gcmx1";
         this.KeyType = "pqc1";
         this.PubKey = new byte[0];
         this.PriKey = new byte[0];
@@ -81,16 +79,15 @@ public class Account implements Serializable {
                 byte[] data = is.readAllBytes();
                 String content = new String(data, StandardCharsets.UTF_8);
                 String[] parts = content.split("\n");
-                if (parts.length >= 3) {
+                if (parts.length >= 2) {
                     this.PackType = parts[0].trim();
                     this.ImgType = parts[1].trim();
-                    this.EncType = parts[2].trim();
                 }
             } catch (Exception e) {
                 this.Msg = "Error with settings.txt: " + e.toString();
             }
         } else {
-            Store(this.PackType, this.ImgType, this.EncType); // make new with default values
+            Store(this.PackType, this.ImgType); // make new with default values
         }
 
         // check if account.webp exists
@@ -291,13 +288,12 @@ public class Account implements Serializable {
     }
 
     // Store settings data to settings.txt
-    public void Store(String pack, String img, String enc) {
+    public void Store(String pack, String img) {
         this.PackType = pack;
         this.ImgType = img;
-        this.EncType = enc;
         IO1.VFile settingsFile = IO1.GetLocal(context, "settings.txt");
         try (OutputStream os = settingsFile.OpenWriter(context, false)) {
-            String content = String.format("%s\n%s\n%s", pack, img, enc);
+            String content = String.format("%s\n%s", pack, img);
             os.write(content.getBytes(StandardCharsets.UTF_8));
         } catch (Exception ignored) {}
     }

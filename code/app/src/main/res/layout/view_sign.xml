@@ -31,32 +31,6 @@
             android:paddingVertical="8dp"
             android:paddingHorizontal="16dp">
 
-            <Spinner
-                android:id="@+id/select_pubkey"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/text_pubkey"
-                style="@style/body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Public: Not Selected" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.card.MaterialCardView
-        style="@style/card"
-        android:layout_marginTop="16dp">
-
-        <LinearLayout
-            style="@style/vbox"
-            android:paddingVertical="8dp"
-            android:paddingHorizontal="16dp">
-
             <LinearLayout style="@style/hbox">
                 <EditText
                     android:id="@+id/edit_sign"
@@ -88,6 +62,13 @@
                         android:contentDescription="Save" />
                 </LinearLayout>
             </LinearLayout>
+
+            <Spinner
+                android:id="@+id/select_pubkey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:minHeight="48dp" />
 
             <LinearLayout
                 style="@style/hbox"
