@@ -41,14 +41,6 @@
                     android:text="Add Files" />
                 <View android:layout_width="4dp" android:layout_height="0dp" />
                 <Button
-                    android:id="@+id/button_add_dir"
-                    style="@style/btnSec"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:paddingHorizontal="4dp"
-                    android:text="Add Folder" />
-                <View android:layout_width="4dp" android:layout_height="0dp" />
-                <Button
                     android:id="@+id/button_clear"
                     style="@style/btnDan"
                     android:layout_width="0dp"

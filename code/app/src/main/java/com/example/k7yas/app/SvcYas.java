@@ -77,6 +77,12 @@ public class SvcYas extends Service {
         return null;
     }
 
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        stopSelf();
+    }
+
     private void createNotificationChannel() {
         NotificationChannel serviceChannel = new NotificationChannel(
                 CHANNEL_ID,
@@ -159,81 +165,31 @@ public class SvcYas extends Service {
         IO1.VFile dst = IO1.CreateDownloadsFile(this, outName);
         if (dst == null) throw new java.io.IOException("Failed to create file in Downloads");
 
-        double count = 0;
-        if (account.PackType.equals("zip1")) { // zip1
-            File temp = new File(getFilesDir(), "archive.temp");
-            try (Szip.ZipWriter zw = new Szip.ZipWriter()) {
-                zw.Open(temp, true);
-                for (IO1.VFile f : srcs) {
-                    try (InputStream is = f.OpenReader(this)) {
-                        zw.Write(f.GetName(this), is);
-                    }
-                    count++;
-                    chan.SetDouble(0, count / srcs.size());
-                }
-            }
-            try (InputStream in = new java.io.FileInputStream(temp); OutputStream out = dst.OpenWriter(this, false)) {
-                in.transferTo(out);
-            }
-            temp.delete();
-
-        } else { // tar1
-            try (OutputStream out = dst.OpenWriter(this, false); Star.TarWriter tw = new Star.TarWriter()) {
-                tw.Open(out);
-                for (IO1.VFile f : srcs) {
-                    try (InputStream is = f.OpenReader(this)) {
-                        tw.Write(f.GetName(this), is, f.GetSize(this), 0644, f.IsDir(this));
-                    }
-                    count++;
-                    chan.SetDouble(0, count / srcs.size());
-                }
-            }
+        // pack and copy
+        chan.SetString(0, "Packing targets...");
+        packFiles(srcs, account.PackType);
+        chan.SetString(0, "Copying file...");
+        File temp = new File(getFilesDir(), "archive.temp");
+        try (InputStream in = new java.io.FileInputStream(temp); OutputStream out = dst.OpenWriter(this, false)) {
+            in.transferTo(out);
         }
     }
 
     // Unpack file
     private void handleUnpack(Bundle b) throws Exception {
+        // Get target files
         IO1.VFile src = b.getParcelable("src", IO1.VFile.class);
         if (src == null) throw new IllegalArgumentException("Source archive null");
         Account account = Account.GetAccount(this);
 
-        double count = 0;
-        if (account.PackType.equals("zip1")) { // zip1
-            File temp = new File(getFilesDir(), "archive.temp");
-            try (InputStream in = src.OpenReader(this); OutputStream out = new java.io.FileOutputStream(temp)) {
-                in.transferTo(out);
-            }
-            try (Szip.ZipReader zr = new Szip.ZipReader()) {
-                zr.Open(temp);
-                for (int i = 0; i < zr.Names.size(); i++) {
-                    IO1.VFile target = IO1.CreateDownloadsFile(this, zr.Names.get(i));
-                    if (target != null) {
-                        try (OutputStream os = target.OpenWriter(this, false); InputStream is = zr.Open(i)) {
-                            is.transferTo(os);
-                        }
-                    }
-                    count++;
-                    chan.SetDouble(0, count / zr.Names.size());
-                }
-                chan.SetDouble(0, 1.0);
-            }
-            temp.delete();
-
-        } else { // tar1
-            try (InputStream is = src.OpenReader(this); Star.TarReader tr = new Star.TarReader()) {
-                tr.Open(is);
-                while (tr.Next()) {
-                    IO1.VFile target = IO1.CreateDownloadsFile(this, tr.Name);
-                    if (target != null) {
-                        try (OutputStream os = target.OpenWriter(this, false)) {
-                            tr.Mkfile(os);
-                        }
-                    }
-                    count++;
-                    chan.SetDouble(0, 1 - 1 / count);
-                }
-            }
+        // copy and unpack
+        chan.SetString(0, "Copying file...");
+        File temp = new File(getFilesDir(), "archive.temp");
+        try (InputStream in = src.OpenReader(this); OutputStream out = new java.io.FileOutputStream(temp)) {
+            in.transferTo(out);
         }
+        chan.SetString(0, "Unpacking archive...");
+        unpackFiles(account.PackType);
     }
 
     // Send files and message
@@ -270,15 +226,7 @@ public class SvcYas extends Service {
             long size = 0;
             if (srcs != null && !srcs.isEmpty()) {
                 chan.SetString(0, "Packing targets to ZIP...");
-                try (Szip.ZipWriter zw = new Szip.ZipWriter()) {
-                    zw.Open(tempPack, true);
-                    for (IO1.VFile f : srcs) {
-                        try (InputStream is = f.OpenReader(this)) {
-                            zw.Write(f.GetName(this), is);
-                        }
-                    }
-                }
-                size = tempPack.length(); // update zip file size
+                size = packFiles(srcs, "zip1");
             }
             chan.SetDouble(0, 0.2); // packing is 20%
 
@@ -422,17 +370,7 @@ public class SvcYas extends Service {
             // unpack zip if file mode
             if ((tp1.Mode & TP1.MODE_MSGONLY) == 0) {
                 chan.SetString(0, "Unpacking received files...");
-                try (Szip.ZipReader zr = new Szip.ZipReader()) {
-                    zr.Open(tempPack);
-                    for (int i = 0; i < zr.Names.size(); i++) {
-                        IO1.VFile target = IO1.CreateDownloadsFile(this, zr.Names.get(i));
-                        if (target != null) {
-                            try (OutputStream os = target.OpenWriter(this, false); InputStream is = zr.Open(i)) {
-                                is.transferTo(os);
-                            }
-                        }
-                    }
-                }
+                unpackFiles("zip1");
             }
             chan.SetDouble(0, 1.0);
 
@@ -477,7 +415,7 @@ public class SvcYas extends Service {
 
             } else { // file mode
                 chan.SetString(0, "Packing files to archive...");
-                long zsize = packFiles(srcs);
+                long zsize = packFiles(srcs, account.PackType);
                 chan.SetDouble(0, 0.25); // packing is 25%
 
                 // make header
@@ -604,7 +542,8 @@ public class SvcYas extends Service {
                 // unpack if required
                 if (ops.BodyInfo != null && ops.BodyInfo.length > 0) {
                     chan.SetString(0, "Unpacking decrypted files...");
-                    unpackFiles();
+                    String packType = new String(ops.BodyInfo, java.nio.charset.StandardCharsets.UTF_8);
+                    unpackFiles(packType);
                 }
             }
         } finally {
@@ -646,7 +585,7 @@ public class SvcYas extends Service {
 
             } else { // file mode
                 chan.SetString(0, "Packing files to archive...");
-                long zsize = packFiles(srcs);
+                long zsize = packFiles(srcs, account.PackType);
                 chan.SetDouble(0, 0.25); // packing is 25%
 
                 // make header
@@ -770,7 +709,8 @@ public class SvcYas extends Service {
                 // unpack if required
                 if (ops.BodyInfo != null && ops.BodyInfo.length > 0) {
                     chan.SetString(0, "Unpacking decrypted files...");
-                    unpackFiles();
+                    String packType = new String(ops.BodyInfo, java.nio.charset.StandardCharsets.UTF_8);
+                    unpackFiles(packType);
                 }
             }
         } finally {
@@ -779,11 +719,10 @@ public class SvcYas extends Service {
     }
 
     // helpers
-    private long packFiles(ArrayList<IO1.VFile> srcs) throws Exception {
-        Account account = Account.GetAccount(this);
+    private long packFiles(ArrayList<IO1.VFile> srcs, String packType) throws Exception {
         File temp = new File(getFilesDir(), "archive.temp");
 
-        if (account.PackType.equals("zip1")) { // zip1
+        if (packType.equals("zip1")) { // zip1
             try (Szip.ZipWriter zw = new Szip.ZipWriter()) {
                 zw.Open(temp, true);
                 for (IO1.VFile f : srcs) {
@@ -806,15 +745,19 @@ public class SvcYas extends Service {
         return temp.length(); // return packed file size
     }
 
-    private void unpackFiles() throws Exception {
-        Account account = Account.GetAccount(this);
+    private void unpackFiles(String packType) throws Exception {
         File temp = new File(getFilesDir(), "archive.temp");
 
-        if (account.PackType.equals("zip1")) { // zip1
+        if (packType.equals("zip1")) { // zip1
             try (Szip.ZipReader zr = new Szip.ZipReader()) {
                 zr.Open(temp);
                 for (int i = 0; i < zr.Names.size(); i++) {
-                    IO1.VFile target = IO1.CreateDownloadsFile(this, zr.Names.get(i));
+                    String name = zr.Names.get(i);
+                    if (name.endsWith("/") || name.endsWith("\\")) {
+                        continue; // skip directories
+                    }
+                    String safeName = name.replace("/", ".").replace("\\", "."); // replace separators
+                    IO1.VFile target = IO1.CreateDownloadsFile(this, safeName);
                     if (target != null) {
                         try (OutputStream os = target.OpenWriter(this, false); InputStream is = zr.Open(i)) {
                             is.transferTo(os);
@@ -827,7 +770,11 @@ public class SvcYas extends Service {
             try (InputStream is = new java.io.FileInputStream(temp); Star.TarReader tr = new Star.TarReader()) {
                 tr.Open(is);
                 while (tr.Next()) {
-                    IO1.VFile target = IO1.CreateDownloadsFile(this, tr.Name);
+                    if (tr.IsDir) {
+                        continue; // skip directories
+                    }
+                    String safeName = tr.Name.replace("/", ".").replace("\\", "."); // replace separators
+                    IO1.VFile target = IO1.CreateDownloadsFile(this, safeName);
                     if (target != null) {
                         try (OutputStream os = target.OpenWriter(this, false)) {
                             tr.Mkfile(os);

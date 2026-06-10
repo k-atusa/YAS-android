@@ -37,12 +37,13 @@ public class DecryptView extends AppCompatActivity {
     private Button buttonGetText, buttonGetFile, buttonDecrypt;
     private TextView textFileStatus, textStatus, textMessage, textSmsg;
     private EditText editCipher, inputPw;
-    private CheckBox checkPubmode;
+    private CheckBox checkPubmode, checkVerify;
     private Spinner selectKf, selectPubkey;
 
     // Data
     private IO1.VFile targetFile;
     private ActivityResultLauncher<Intent> fileLauncher;
+    private ActivityResultLauncher<Intent> textLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class DecryptView extends AppCompatActivity {
         editCipher = findViewById(R.id.edit_cipher);
         inputPw = findViewById(R.id.input_pw);
         checkPubmode = findViewById(R.id.check_pubmode);
+        checkVerify = findViewById(R.id.check_verify);
         selectKf = findViewById(R.id.select_kf);
         selectPubkey = findViewById(R.id.select_pubkey);
 
@@ -92,15 +94,25 @@ public class DecryptView extends AppCompatActivity {
                 }
         );
         buttonGetFile.setOnClickListener(v -> IO1.SelectFile(fileLauncher, false));
-        buttonGetText.setOnClickListener(v -> {
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            if (clipboard.hasPrimaryClip()) {
-                ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
-                editCipher.setText(item.getText());
-                targetFile = null; // clear file mode if text pasted
-                textFileStatus.setText("No file selected");
-            }
-        });
+        textLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        List<IO1.VFile> files = IO1.HandleSelectedFile(result.getData());
+                        if (files != null && !files.isEmpty()) {
+                            try (InputStream is = files.get(0).OpenReader(this)) {
+                                byte[] data = is.readAllBytes();
+                                editCipher.setText(new String(data, java.nio.charset.StandardCharsets.UTF_8));
+                                targetFile = null;
+                                textFileStatus.setText("No file selected");
+                            } catch (Exception e) {
+                                Toast.makeText(this, "Failed to read: " + e.toString(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+                }
+        );
+        buttonGetText.setOnClickListener(v -> IO1.SelectFile(textLauncher, false));
 
         // bind mode toggle
         checkPubmode.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -131,7 +143,11 @@ public class DecryptView extends AppCompatActivity {
         Account account = Account.GetAccount(this);
         
         String[] kfs = account.GetList(true);
-        ArrayAdapter<String> kfAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, kfs);
+        java.util.List<String> kfList = new java.util.ArrayList<>();
+        kfList.add("No keyfile selected");
+        for (String kf : kfs) kfList.add(kf);
+
+        ArrayAdapter<String> kfAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, kfList);
         kfAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         selectKf.setAdapter(kfAdapter);
 
@@ -182,7 +198,8 @@ public class DecryptView extends AppCompatActivity {
         b.putString("text", editCipher.getText().toString());
 
         if (checkPubmode.isChecked()) { // public key mode
-            String pubName = (String) selectPubkey.getSelectedItem();
+            String pubName = "";
+            if (checkVerify.isChecked()) pubName = (String) selectPubkey.getSelectedItem();
             b.putString("pubName", pubName != null ? pubName : "");
             SVCC1.getChan().SendToSvc("TASK_DEC_PUB", b);
 
@@ -190,6 +207,7 @@ public class DecryptView extends AppCompatActivity {
             byte[] pw = Bencode.NormPW(inputPw.getText().toString());
             inputPw.setText("");
             String kfName = (String) selectKf.getSelectedItem();
+            if (kfName != null && kfName.equals("No keyfile selected")) kfName = "";
             
             // mask password
             Bencrypt.Masker masker = Bencrypt.Masker.GetMasker();

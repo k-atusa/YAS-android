@@ -21,13 +21,12 @@ import java.util.List;
 public class PackView extends AppCompatActivity {
     // UI Components
     private ImageButton buttonMenu;
-    private Button buttonAddFiles, buttonAddDir, buttonClear, buttonPack, buttonUnpack;
+    private Button buttonAddFiles, buttonClear, buttonPack, buttonUnpack;
     private TextView textFilelist, textStatus;
 
     // Filelist workers
     private final List<IO1.VFile> fileList = new ArrayList<>();
     private ActivityResultLauncher<Intent> fileLauncher;
-    private ActivityResultLauncher<Intent> folderLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +35,6 @@ public class PackView extends AppCompatActivity {
         setContentView(R.layout.view_pack);
         buttonMenu = findViewById(R.id.button_menu);
         buttonAddFiles = findViewById(R.id.button_add_files);
-        buttonAddDir = findViewById(R.id.button_add_dir);
         buttonClear = findViewById(R.id.button_clear);
         buttonPack = findViewById(R.id.button_pack);
         buttonUnpack = findViewById(R.id.button_unpack);
@@ -46,7 +44,6 @@ public class PackView extends AppCompatActivity {
         // bind filelist functions
         initLaunchers();
         buttonAddFiles.setOnClickListener(v -> IO1.SelectFile(fileLauncher, true));
-        buttonAddDir.setOnClickListener(v -> IO1.SelectFolder(folderLauncher));
         buttonClear.setOnClickListener(v -> {
             fileList.clear();
             textFilelist.setText("No Files Selected...");
@@ -75,18 +72,6 @@ public class PackView extends AppCompatActivity {
                         List<IO1.VFile> files = IO1.HandleSelectedFile(result.getData());
                         if (files != null && !files.isEmpty()) {
                             fileList.addAll(files);
-                            refreshFileview();
-                        }
-                    }
-                }
-        );
-        folderLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        IO1.VFile folder = IO1.HandleSelectedFolder(result.getData());
-                        if (folder != null) {
-                            fileList.add(folder);
                             refreshFileview();
                         }
                     }

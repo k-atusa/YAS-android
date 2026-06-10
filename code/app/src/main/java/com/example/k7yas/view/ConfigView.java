@@ -34,8 +34,8 @@ public class ConfigView extends AppCompatActivity {
     private Spinner selectPackType, selectImgType, selectPubkey, selectKf;
     private Button buttonSaveConfig, buttonAddPubkey, buttonDelPubkey, buttonSelectFile, buttonAddKf, buttonDelKf;
     private ImageButton buttonMenu, buttonView, buttonDownload, buttonEdit;
-    private EditText editPubkey, inputPubkeyName, inputKfName;
-    private TextView textFileStatus, editPubkeyContent, editPrivkeyContent, textStatus;
+    private EditText editPubkey, inputPubkeyName, inputKfName, editPubkeyContent, editPrivkeyContent;
+    private TextView textFileStatus, textStatus;
 
     // Data
     private IO1.VFile targetFile;

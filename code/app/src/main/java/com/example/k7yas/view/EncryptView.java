@@ -35,7 +35,7 @@ import java.util.Locale;
 public class EncryptView extends AppCompatActivity {
     // UI Components
     private ImageButton buttonMenu, buttonCopy, buttonDownload;
-    private Button buttonAddFiles, buttonAddDir, buttonClear, buttonEncrypt;
+    private Button buttonAddFiles, buttonClear, buttonEncrypt;
     private TextView textFilelist, textResult, textStatus;
     private EditText inputMsg, editSmsg, inputPw;
     private CheckBox checkPubkey, checkSign;
@@ -44,7 +44,6 @@ public class EncryptView extends AppCompatActivity {
     // Data
     private final List<IO1.VFile> fileList = new ArrayList<>();
     private ActivityResultLauncher<Intent> fileLauncher;
-    private ActivityResultLauncher<Intent> folderLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +55,6 @@ public class EncryptView extends AppCompatActivity {
         buttonCopy = findViewById(R.id.button_copy);
         buttonDownload = findViewById(R.id.button_download);
         buttonAddFiles = findViewById(R.id.button_add_files);
-        buttonAddDir = findViewById(R.id.button_add_dir);
         buttonClear = findViewById(R.id.button_clear);
         buttonEncrypt = findViewById(R.id.button_encrypt);
         textFilelist = findViewById(R.id.text_filelist);
@@ -73,7 +71,6 @@ public class EncryptView extends AppCompatActivity {
         // bind file selection
         initLaunchers();
         buttonAddFiles.setOnClickListener(v -> IO1.SelectFile(fileLauncher, true));
-        buttonAddDir.setOnClickListener(v -> IO1.SelectFolder(folderLauncher));
         buttonClear.setOnClickListener(v -> {
             fileList.clear();
             textFilelist.setText("No Files Selected...");
@@ -121,18 +118,6 @@ public class EncryptView extends AppCompatActivity {
                     }
                 }
         );
-        folderLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        IO1.VFile folder = IO1.HandleSelectedFolder(result.getData());
-                        if (folder != null) {
-                            fileList.add(folder);
-                            refreshFileview();
-                        }
-                    }
-                }
-        );
     }
 
     private void refreshFileview() {
@@ -151,7 +136,11 @@ public class EncryptView extends AppCompatActivity {
         Account account = Account.GetAccount(this);
         
         String[] kfs = account.GetList(true);
-        ArrayAdapter<String> kfAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, kfs);
+        List<String> kfList = new ArrayList<>();
+        kfList.add("No keyfile selected");
+        for (String kf : kfs) kfList.add(kf);
+
+        ArrayAdapter<String> kfAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, kfList);
         kfAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         selectKf.setAdapter(kfAdapter);
 
@@ -217,6 +206,8 @@ public class EncryptView extends AppCompatActivity {
             byte[] pw = Bencode.NormPW(inputPw.getText().toString());
             inputPw.setText("");
             String kfName = (String) selectKf.getSelectedItem();
+            if (kfName != null && kfName.equals("No keyfile selected")) kfName = "";
+
             Bencrypt.Masker masker = Bencrypt.Masker.GetMasker();
             byte[] maskedPw = masker.XOR(pw);
             Account.sclear(pw);

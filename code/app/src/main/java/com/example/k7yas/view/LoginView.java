@@ -1,7 +1,10 @@
 package com.example.k7yas.view;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,6 +13,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import com.example.k7yas.R;
 import com.example.k7yas.app.Account;
 import com.example.k7yas.app.IO1;
@@ -32,12 +36,27 @@ public class LoginView extends AppCompatActivity {
     // worker datas
     private Account account;
     private ActivityResultLauncher<Intent> importLauncher;
+    private ActivityResultLauncher<String> permissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // start view, connect components
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_login);
+
+        // check notification permission
+        permissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (!isGranted) {
+                        Toast.makeText(this, "Notification permission denied.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+        }
+
         inputMsg = findViewById(R.id.input_msg);
         inputPw = findViewById(R.id.input_pw);
         buttonLogin = findViewById(R.id.button_login);
@@ -70,6 +89,10 @@ public class LoginView extends AppCompatActivity {
                     account.Load(pw);
                     runOnUiThread(() -> {
                         Toast.makeText(this, "Login Success", Toast.LENGTH_SHORT).show();
+                        
+                        // start foreground service, pack view
+                        Intent svcIntent = new Intent(this, com.example.k7yas.app.SvcYas.class);
+                        startForegroundService(svcIntent);
                         startActivity(new Intent(this, PackView.class));
                         finish();
                     });

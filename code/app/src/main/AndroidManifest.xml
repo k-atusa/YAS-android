@@ -34,6 +34,7 @@
     <service
         android:name=".app.SvcYas"
         android:foregroundServiceType="dataSync"
+        android:stopWithTask="true"
         android:exported="false" />
 </application>
 </manifest>

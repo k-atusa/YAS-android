@@ -207,7 +207,7 @@ public class Account implements Serializable {
         byte[] priv = mask.XOR(this.PriKey);
         Map<String, byte[]> innerCfgMap = new HashMap<>();
         innerCfgMap.put("keytype", this.KeyType.getBytes(StandardCharsets.UTF_8));
-        innerCfgMap.put("public", this.PubKey);
+        innerCfgMap.put("public", this.PubKey.clone());
         innerCfgMap.put("private", priv);
 
         byte[] smsgInfoBytes = ops.EncodeCfg(innerCfgMap);

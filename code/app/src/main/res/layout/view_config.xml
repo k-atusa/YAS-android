@@ -74,6 +74,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Paste Public Key"
                     android:minLines="3"
+                    android:maxLines="7"
                     android:gravity="top"
                     android:background="?attr/colorSurface"
                     android:padding="8dp"
@@ -200,27 +201,35 @@
                     android:layout_width="0dp"
                     android:layout_weight="1">
 
-                    <TextView
+                    <EditText
                         android:id="@+id/edit_pubkey_content"
                         style="@style/body"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:minLines="3"
+                        android:maxLines="7"
                         android:background="?attr/colorSurface"
                         android:padding="8dp"
-                        android:text="Pubkey data..." />
+                        android:text="Pubkey data..."
+                        android:inputType="textMultiLine"
+                        android:gravity="top"
+                        android:autofillHints="none" />
 
-                    <TextView
+                    <EditText
                         android:id="@+id/edit_privkey_content"
                         style="@style/body"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:minLines="3"
+                        android:maxLines="7"
                         android:background="?attr/colorSurface"
                         android:padding="8dp"
-                        android:text="Privkey data..." />
+                        android:text="Privkey data..."
+                        android:inputType="textMultiLine"
+                        android:gravity="top"
+                        android:autofillHints="none" />
                 </LinearLayout>
 
                 <LinearLayout

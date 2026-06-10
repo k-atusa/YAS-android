@@ -41,14 +41,6 @@
                     android:text="Add Files" />
                 <View android:layout_width="4dp" android:layout_height="0dp" />
                 <Button
-                    android:id="@+id/button_add_dir"
-                    style="@style/btnSec"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:paddingHorizontal="4dp"
-                    android:text="Add Folder" />
-                <View android:layout_width="4dp" android:layout_height="0dp" />
-                <Button
                     android:id="@+id/button_clear"
                     style="@style/btnDan"
                     android:layout_width="0dp"
@@ -92,11 +84,13 @@
                 android:layout_height="wrap_content"
                 android:hint="Secret Message"
                 android:minLines="3"
+                android:maxLines="7"
                 android:gravity="top"
                 android:background="?attr/colorSurface"
                 android:padding="8dp"
                 android:inputType="textMultiLine"
                 android:autofillHints="none" />
+
 
             <EditText
                 android:id="@+id/input_ip"

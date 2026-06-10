@@ -40,6 +40,7 @@
                     android:layout_weight="1"
                     android:hint="Signature"
                     android:minLines="3"
+                    android:maxLines="7"
                     android:gravity="top"
                     android:background="?attr/colorSurface"
                     android:padding="8dp"
