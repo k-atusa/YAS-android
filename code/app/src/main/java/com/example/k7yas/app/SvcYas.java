@@ -30,6 +30,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SvcYas extends Service {
+    // methods
+    public static final String METHOD_HASH = "arg2";
+    public static final String METHOD_ASYM = "pqc1";
+    public static final String METHOD_SYM = "gcmx1";
+    public static final String METHOD_SYM_I = "gcm1";
+
+    // worker datas
     private static final String CHANNEL_ID = "YasForegroundServiceChannel";
     private ExecutorService executor;
     private final SVCC1 chan = SVCC1.getChan();
@@ -407,7 +414,7 @@ public class SvcYas extends Service {
                 ops.Msg = msg;
                 ops.Smsg = smsg;
 
-                byte[] header = ops.Encpw("arg2", unmaskedPw, unmaskedKf); // always use arg2
+                byte[] header = ops.Encpw(METHOD_HASH, unmaskedPw, unmaskedKf); // always use arg2
                 java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
                 ops.Write(baos, header);
                 String txtRes = Bencode.Encode64(baos.toByteArray(), "#", 80, 10);
@@ -422,17 +429,17 @@ public class SvcYas extends Service {
                 chan.SetString(0, "Creating encryption header...");
                 IO1.VFile dst = IO1.CreateDownloadsFile(this, "encrypted." + account.ImgType);
                 if (dst == null) throw new java.io.IOException("Failed to create download file");
-                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster("gcmx1", new byte[44]);
+                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster(METHOD_SYM, new byte[44]);
 
                 Opsec ops = new Opsec();
                 ops.Reset();
                 ops.Msg = msg;
                 ops.Smsg = smsg;
                 ops.BodySize = dummySm.AfterSize(zsize);
-                ops.BodyAlgo = "gcmx1"; // always use gcmx1
+                ops.BodyAlgo = METHOD_SYM;
                 ops.BodyInfo = account.PackType.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
-                byte[] header = ops.Encpw("arg2", unmaskedPw, unmaskedKf);
+                byte[] header = ops.Encpw(METHOD_HASH, unmaskedPw, unmaskedKf);
                 Bencrypt.SymMaster sm = new Bencrypt.SymMaster(ops.BodyAlgo, ops.BodyKey);
                 Account.sclear(ops.BodyKey);
 
@@ -592,14 +599,14 @@ public class SvcYas extends Service {
                 chan.SetString(0, "Creating encryption header...");
                 IO1.VFile dst = IO1.CreateDownloadsFile(this, "encrypted." + account.ImgType);
                 if (dst == null) throw new java.io.IOException("Failed to create download file");
-                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster("gcmx1", new byte[44]);
+                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster(METHOD_SYM, new byte[44]);
 
                 Opsec ops = new Opsec();
                 ops.Reset();
                 ops.Msg = msg;
                 ops.Smsg = smsg;
                 ops.BodySize = dummySm.AfterSize(zsize);
-                ops.BodyAlgo = "gcmx1"; // always use gcmx1
+                ops.BodyAlgo = METHOD_SYM;
                 ops.BodyInfo = account.PackType.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
                 byte[] header = ops.Encpub(account.KeyType, peerPub, unmaskedPri);

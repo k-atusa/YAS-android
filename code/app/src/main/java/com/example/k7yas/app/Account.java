@@ -64,7 +64,7 @@ public class Account implements Serializable {
         // set basic values
         this.PackType = "zip1";
         this.ImgType = "webp";
-        this.KeyType = "pqc1";
+        this.KeyType = SvcYas.METHOD_ASYM;
         this.PubKey = new byte[0];
         this.PriKey = new byte[0];
         this.KeyFiles = new HashMap<>();
@@ -226,7 +226,7 @@ public class Account implements Serializable {
 
         byte[] plainBody = ops.EncodeCfg(bodyCfgMap);
         for (byte[] val : bodyCfgMap.values()) sclear(val);
-        Bencrypt.SymMaster sm = new Bencrypt.SymMaster("gcm1", new byte[44]);
+        Bencrypt.SymMaster sm = new Bencrypt.SymMaster(SvcYas.METHOD_SYM_I, new byte[44]);
         long bodySizeAfter = sm.AfterSize(plainBody.length);
 
         // 3. set opsec format
@@ -234,13 +234,13 @@ public class Account implements Serializable {
         ops.Msg = this.Msg;
         ops.SmsgInfo = smsgInfoBytes;
         ops.BodySize = bodySizeAfter;
-        ops.BodyAlgo = "gcm1";
+        ops.BodyAlgo = SvcYas.METHOD_SYM_I;
 
         byte[] unmaskedPw = mask.XOR(this.password);
-        byte[] header = ops.Encpw("arg2", unmaskedPw, null); // always saved with arg2
+        byte[] header = ops.Encpw(SvcYas.METHOD_HASH, unmaskedPw, null);
         sclear(unmaskedPw);
 
-        sm = new Bencrypt.SymMaster("gcm1", ops.BodyKey);
+        sm = new Bencrypt.SymMaster(SvcYas.METHOD_SYM_I, ops.BodyKey);
         sclear(ops.BodyKey);
         IO1.VFile accountFile = IO1.GetLocal(context, "account.webp");
         long totalWrited = 0;

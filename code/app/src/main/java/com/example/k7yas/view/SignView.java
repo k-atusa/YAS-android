@@ -177,7 +177,7 @@ public class SignView extends AppCompatActivity {
             try {
                 // get private key and data
                 if (targetFile.GetSize(this) > 64 * 1024 * 1024) {
-                    throw new Exception("File size over 64MB limit");
+                    throw new Exception("File size over 64MiB limit");
                 }
                 Account account = Account.GetAccount(this);
                 Bencrypt.Masker masker = Bencrypt.Masker.GetMasker();

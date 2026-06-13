@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import com.example.k7yas.R;
 import com.example.k7yas.app.Account;
 import com.example.k7yas.app.IO1;
+import com.example.k7yas.app.SvcYas;
 import com.example.k7yas.engine.Bencode;
 import com.example.k7yas.engine.Bencrypt;
 
@@ -111,12 +112,12 @@ public class LoginView extends AppCompatActivity {
             inputPw.setText("");
 
             new AlertDialog.Builder(this)
-                    .setMessage("Make new account? (algorithm: arg2+pqc1)")
+                    .setMessage("Make new account? ("+SvcYas.METHOD_HASH+", "+SvcYas.METHOD_ASYM+")")
                     .setPositiveButton("Create", (d, w) -> new Thread(() -> {
                         byte[][] keys = null;
                         try {
                             // generate key pair
-                            Bencrypt.AsymMaster am = new Bencrypt.AsymMaster("pqc1");
+                            Bencrypt.AsymMaster am = new Bencrypt.AsymMaster(SvcYas.METHOD_ASYM);
                             keys = am.Genkey(); // keys[0] = Public, keys[1] = Private
                             if (keys == null || keys.length < 2) throw new Exception("Key generation failed");
                             account.PubKey = keys[0];
@@ -160,7 +161,7 @@ public class LoginView extends AppCompatActivity {
         List<IO1.VFile> selected = IO1.HandleSelectedFile(data);
         if (selected == null || selected.isEmpty()) return;
         IO1.VFile src = selected.get(0);
-        if (src.GetSize(this) > 32L * 1024 * 1024) { // 32MB Guard
+        if (src.GetSize(this) > 32L * 1024 * 1024) { // 32MiB Guard
             Toast.makeText(this, "File size limit exceeded (32MiB)", Toast.LENGTH_LONG).show();
             return;
         }

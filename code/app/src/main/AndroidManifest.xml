@@ -40,10 +40,11 @@
 </manifest>
 
 <!--
-    resource:
-        res - new - image asset - add foreground, background image
-        drawable - new - vector asset - search, add
-    build:
-        file - project structure - dependency - add org.bouncycastle:bcprov-jdk18on com.lambdapioneer.argon2kt:argon2kt
-        build.gradle.kts - set version info
+test822: USAG YAS android
+resource:
+    res - new - image asset - add foreground, background image
+    drawable - new - vector asset - search, add
+build:
+    file - project structure - dependency - add org.bouncycastle:bcprov-jdk18on com.lambdapioneer.argon2kt:argon2kt
+    build.gradle.kts - set version info
 -->
