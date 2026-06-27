@@ -20,8 +20,6 @@ import com.example.k7yas.engine.Star;
 import com.example.k7yas.engine.Szip;
 import com.example.k7yas.engine.TP1;
 
-import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,7 +29,7 @@ import java.util.concurrent.Executors;
 
 public class SvcYas extends Service {
     // methods
-    public static final String METHOD_HASH = "arg2";
+    public static final String METHOD_HASH = "arg2st";
     public static final String METHOD_ASYM = "pqc1";
     public static final String METHOD_SYM = "gcmx1";
     public static final String METHOD_SYM_I = "gcm1";
@@ -221,7 +219,7 @@ public class SvcYas extends Service {
         try {
             // make connection, prepare temp files
             socket.MakeConnection(ip, port);
-            int mode = TP1.SYM_GCMX1 | TP1.HASH_ARG2 | TP1.ASYM_PQC1; // arg2, pqc1, gcmx1
+            int mode = TP1.SYM_GCMX1 | TP1.HASH_ARG2_ST | TP1.ASYM_PQC1; // arg2st, pqc1, gcmx1
             if (srcs == null || srcs.isEmpty()) {
                 mode |= TP1.MODE_MSGONLY;
             }
@@ -410,7 +408,6 @@ public class SvcYas extends Service {
             if (srcs == null || srcs.isEmpty()) { // msg-only mode
                 chan.SetString(0, "Encrypting secure message...");
                 Opsec ops = new Opsec();
-                ops.Reset();
                 ops.Msg = msg;
                 ops.Smsg = smsg;
 
@@ -429,10 +426,9 @@ public class SvcYas extends Service {
                 chan.SetString(0, "Creating encryption header...");
                 IO1.VFile dst = IO1.CreateDownloadsFile(this, "encrypted." + account.ImgType);
                 if (dst == null) throw new java.io.IOException("Failed to create download file");
-                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster(METHOD_SYM, new byte[44]);
+                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster(METHOD_SYM, new byte[32]);
 
                 Opsec ops = new Opsec();
-                ops.Reset();
                 ops.Msg = msg;
                 ops.Smsg = smsg;
                 ops.BodySize = dummySm.AfterSize(zsize);
@@ -518,7 +514,6 @@ public class SvcYas extends Service {
                 }
 
                 Opsec ops = new Opsec();
-                ops.Reset();
                 try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
                     byte[] header = ops.Read(bais, 0);
                     ops.View(header);
@@ -530,7 +525,6 @@ public class SvcYas extends Service {
             } else { // file mode
                 chan.SetString(0, "Reading encrypted file header...");
                 Opsec ops = new Opsec();
-                ops.Reset();
 
                 try (InputStream is = srcFile.OpenReader(this)) {
                     byte[] header = ops.Read(is, 0);
@@ -580,7 +574,6 @@ public class SvcYas extends Service {
             if (srcs == null || srcs.isEmpty()) { // msg-only mode
                 chan.SetString(0, "Encrypting secure message...");
                 Opsec ops = new Opsec();
-                ops.Reset();
                 ops.Msg = msg;
                 ops.Smsg = smsg;
 
@@ -599,10 +592,9 @@ public class SvcYas extends Service {
                 chan.SetString(0, "Creating encryption header...");
                 IO1.VFile dst = IO1.CreateDownloadsFile(this, "encrypted." + account.ImgType);
                 if (dst == null) throw new java.io.IOException("Failed to create download file");
-                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster(METHOD_SYM, new byte[44]);
+                Bencrypt.SymMaster dummySm = new Bencrypt.SymMaster(METHOD_SYM, new byte[32]);
 
                 Opsec ops = new Opsec();
-                ops.Reset();
                 ops.Msg = msg;
                 ops.Smsg = smsg;
                 ops.BodySize = dummySm.AfterSize(zsize);
@@ -685,7 +677,6 @@ public class SvcYas extends Service {
                 }
 
                 Opsec ops = new Opsec();
-                ops.Reset();
                 try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
                     byte[] header = ops.Read(bais, 0);
                     ops.View(header);
@@ -697,7 +688,6 @@ public class SvcYas extends Service {
             } else { // file mode
                 chan.SetString(0, "Reading encrypted file header...");
                 Opsec ops = new Opsec();
-                ops.Reset();
 
                 try (InputStream is = srcFile.OpenReader(this)) {
                     byte[] header = ops.Read(is, 0);

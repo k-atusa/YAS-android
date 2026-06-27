@@ -95,7 +95,6 @@ public class Account implements Serializable {
         if (accountFile.Exists(context)) {
             try (InputStream ins = accountFile.OpenReader(context)) {
                 Opsec ops = new Opsec();
-                ops.Reset();
                 byte[] header = ops.Read(ins, 0);
                 if (header != null && header.length > 0) {
                     ops.View(header);
@@ -147,7 +146,6 @@ public class Account implements Serializable {
         // read opsec header
         try (InputStream ins = accountFile.OpenReader(context)) {
             Opsec ops = new Opsec();
-            ops.Reset();
             byte[] header = ops.Read(ins, 0);
             if (header == null || header.length == 0) throw new Exception("invalid Opsec format");
             ops.View(header);
@@ -226,11 +224,10 @@ public class Account implements Serializable {
 
         byte[] plainBody = ops.EncodeCfg(bodyCfgMap);
         for (byte[] val : bodyCfgMap.values()) sclear(val);
-        Bencrypt.SymMaster sm = new Bencrypt.SymMaster(SvcYas.METHOD_SYM_I, new byte[44]);
+        Bencrypt.SymMaster sm = new Bencrypt.SymMaster(SvcYas.METHOD_SYM_I, new byte[32]);
         long bodySizeAfter = sm.AfterSize(plainBody.length);
 
         // 3. set opsec format
-        ops.Reset();
         ops.Msg = this.Msg;
         ops.SmsgInfo = smsgInfoBytes;
         ops.BodySize = bodySizeAfter;

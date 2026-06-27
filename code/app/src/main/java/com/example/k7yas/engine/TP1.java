@@ -26,7 +26,7 @@ public class TP1 {
     private static volatile Object DUMMY;
 
     private static void sclear(byte[] data) {
-        java.util.Arrays.fill(data, (byte) 0);
+        Arrays.fill(data, (byte) 0);
         DUMMY = data;
     }
 
@@ -39,18 +39,16 @@ public class TP1 {
 
     // Hash Function Mode
     public static final int HASH_SHA3 = 0x10;
-    public static final int HASH_PBK2 = 0x20;
-    public static final int HASH_ARG2 = 0x30;
+    public static final int HASH_ARG2_LOW = 0x20;
+    public static final int HASH_ARG2_ST = 0x30;
 
     // Symmetric Encryption Mode
     public static final int SYM_GCM1 = 0x100;
     public static final int SYM_GCMX1 = 0x200;
 
     // Asymmetric Encryption Mode
-    public static final int ASYM_RSA1 = 0x1000;
-    public static final int ASYM_RSA2 = 0x2000;
-    public static final int ASYM_ECC1 = 0x3000;
-    public static final int ASYM_PQC1 = 0x4000;
+    public static final int ASYM_ECC1 = 0x1000;
+    public static final int ASYM_PQC1 = 0x2000;
 
     // Status
     public static final int STAGE_IDLE = 0;
@@ -222,11 +220,7 @@ public class TP1 {
         // 1. Generate key pair
         String algo = "";
         int asymMode = this.Mode & 0xF000;
-        if (asymMode == ASYM_RSA1)
-            algo = "rsa1";
-        else if (asymMode == ASYM_RSA2)
-            algo = "rsa2";
-        else if (asymMode == ASYM_ECC1)
+        if (asymMode == ASYM_ECC1)
             algo = "ecc1";
         else if (asymMode == ASYM_PQC1)
             algo = "pqc1";
@@ -254,13 +248,13 @@ public class TP1 {
         int hashMode = this.Mode & 0xF0;
         if (hashMode == HASH_SHA3)
             hashAlgo = "sha3";
-        else if (hashMode == HASH_PBK2)
-            hashAlgo = "pbk2";
-        else if (hashMode == HASH_ARG2)
-            hashAlgo = "arg2";
+        else if (hashMode == HASH_ARG2_LOW)
+            hashAlgo = "arg2low";
+        else if (hashMode == HASH_ARG2_ST)
+            hashAlgo = "arg2st";
         else
             throw new Exception("invalid mode: no valid algorithm flag set");
-        Bencrypt.HashMaster hm = new Bencrypt.HashMaster(hashAlgo, 32, 44);
+        Bencrypt.HashMaster hm = new Bencrypt.HashMaster(hashAlgo);
         byte[] shs = this.mask.XOR(this.SharedS);
         byte[] hashSrc = concat(myPub, shs);
         byte[] hash = hm.KDF(hashSrc, nonce)[0];
@@ -301,8 +295,10 @@ public class TP1 {
         sclear(shs);
         sclear(verifySrc);
         if (!Arrays.equals(peerHash, verifyHash)) {
+            util.Clear();
             throw new Exception("receiver authentication failed");
         }
+        util.Clear();
         return new HandshakeResult(peerPub, myPub, myPriv);
     }
 
@@ -319,11 +315,7 @@ public class TP1 {
         // 2. Generate key pair
         String algo = "";
         int asymMode = this.Mode & 0xF000;
-        if (asymMode == ASYM_RSA1)
-            algo = "rsa1";
-        else if (asymMode == ASYM_RSA2)
-            algo = "rsa2";
-        else if (asymMode == ASYM_ECC1)
+        if (asymMode == ASYM_ECC1)
             algo = "ecc1";
         else if (asymMode == ASYM_PQC1)
             algo = "pqc1";
@@ -345,13 +337,13 @@ public class TP1 {
         int hashMode = this.Mode & 0xF0;
         if (hashMode == HASH_SHA3)
             hashAlgo = "sha3";
-        else if (hashMode == HASH_PBK2)
-            hashAlgo = "pbk2";
-        else if (hashMode == HASH_ARG2)
-            hashAlgo = "arg2";
+        else if (hashMode == HASH_ARG2_LOW)
+            hashAlgo = "arg2low";
+        else if (hashMode == HASH_ARG2_ST)
+            hashAlgo = "arg2st";
         else
             throw new Exception("invalid mode: no valid hash algorithm flag set");
-        Bencrypt.HashMaster hm = new Bencrypt.HashMaster(hashAlgo, 32, 44);
+        Bencrypt.HashMaster hm = new Bencrypt.HashMaster(hashAlgo);
 
         // 5. Send receiver auth: Nonce 8B + Hash 32B
         Bencrypt worker = new Bencrypt();
@@ -390,8 +382,10 @@ public class TP1 {
         sclear(shs);
         sclear(verifySrc);
         if (!Arrays.equals(peerHash, verifyHash)) {
+            util.Clear();
             throw new Exception("sender authentication failed");
         }
+        util.Clear();
         return new HandshakeResult(peerPub, myPub, myPriv);
     }
 
@@ -439,7 +433,7 @@ public class TP1 {
                     symAlgo = "gcmx1";
                 else
                     throw new Exception("invalid mode: no valid algorithm flag set");
-                Bencrypt.SymMaster sm = new Bencrypt.SymMaster(symAlgo, new byte[44]);
+                Bencrypt.SymMaster sm = new Bencrypt.SymMaster(symAlgo, new byte[32]);
 
                 // 3. Prepare Opsec Header
                 Opsec ops = new Opsec();
@@ -450,11 +444,7 @@ public class TP1 {
 
                 String asymAlgo = "";
                 int asymMode = this.Mode & 0xF000;
-                if (asymMode == ASYM_RSA1)
-                    asymAlgo = "rsa1";
-                else if (asymMode == ASYM_RSA2)
-                    asymAlgo = "rsa2";
-                else if (asymMode == ASYM_ECC1)
+                if (asymMode == ASYM_ECC1)
                     asymAlgo = "ecc1";
                 else if (asymMode == ASYM_PQC1)
                     asymAlgo = "pqc1";
@@ -546,9 +536,11 @@ public class TP1 {
                 byte[] term = new byte[8];
                 readFull(in, term);
                 if (!Arrays.equals(term, zero8)) {
+                    ops.Clear();
                     throw new Exception("abnormal termination signal");
                 }
                 setStage(STAGE_COMPLETE);
+                ops.Clear();
                 return new TP1Result(hs.myPub, hs.peerPub, smsg, null);
 
             } catch (Exception e) {

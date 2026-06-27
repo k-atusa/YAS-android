@@ -1,4 +1,4 @@
-# YAS-android v1.0.0
+# YAS-android v1.1.0
 
 project USAG: Yet Another Security android version
 
@@ -9,7 +9,7 @@ project USAG: Yet Another Security android version
 - YAS-android supports core functions of YAS-desktop
 - Zip/Unzip, Sign/Verify, Send/Receive, Encrypt/Decrypt, Account/Settings
 - Account files of YAS-android and YAS-desktop are compatiable
-- Only following algorithms are available in YAS-android: arg2, pqc1
+- Only following algorithms are available in YAS-android: arg2st, pqc1
 
 ## Build Executable
 

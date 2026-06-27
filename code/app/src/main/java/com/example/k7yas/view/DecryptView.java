@@ -1,8 +1,5 @@
 package com.example.k7yas.view;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
@@ -80,7 +77,6 @@ public class DecryptView extends AppCompatActivity {
                             // peek opsec header
                             try (InputStream is = targetFile.OpenReader(this)) {
                                 Opsec ops = new Opsec();
-                                ops.Reset();
                                 byte[] header = ops.Read(is, 0);
                                 if (header != null && header.length > 0) {
                                     ops.View(header);
